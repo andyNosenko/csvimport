@@ -74,7 +74,6 @@ class CsvImportCommand extends Command
         }
 
         $this->em->flush();
-        $io->progress()
         $io->warning($total - $processed.' items were skiped');
         $io->success($processed.' items imported seccessfuly!');
 
