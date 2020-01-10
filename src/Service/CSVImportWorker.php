@@ -8,7 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use League\Csv\Reader;
+use App\Service\CSVReadFile;
+
 
 class CSVImportWorker
 {
@@ -18,9 +19,15 @@ class CSVImportWorker
     */
     private $em;
 
-    public function __construct(EntityManagerInterface $em)
+    /**
+    * @var CSVReadFile
+    */
+    private $csvReadFile;
+
+    public function __construct(EntityManagerInterface $em, CSVReadFile $csvReadFile)
     {
         $this->em = $em;
+        $this->csvReadFile = $csvReadFile;
     }
 
     public function importProducts(InputInterface $input, OutputInterface $output)
@@ -28,7 +35,7 @@ class CSVImportWorker
       $io = new SymfonyStyle($input, $output);
       $io->title('Attempting import of Products...');
 
-      $reader = Reader::createFromPath('%kernel.root_dir%/../src/Data/stock.csv');
+      $reader = $this->csvReadFile->read('%kernel.root_dir%/../src/Data/stock.csv');
 
       $results = $reader->fetchAssoc();
       $total = iterator_count($results);
