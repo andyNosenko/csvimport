@@ -7,4 +7,6 @@
 /public/bundles/
 /var/
 /vendor/
+/public/.htaccess
+.idea
 ###< symfony/framework-bundle ###

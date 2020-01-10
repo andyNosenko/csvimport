@@ -34,7 +34,7 @@ class ProductController extends AbstractController
 
         return $this->json([
             'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ProudctController.php',
+            'path' => 'src/Controller/ProductController.php',
         ]);
     }
 
