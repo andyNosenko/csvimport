@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CSVImportWorker;
 
 class ProductController extends AbstractController
 {
@@ -36,4 +37,15 @@ class ProductController extends AbstractController
             'path' => 'src/Controller/ProudctController.php',
         ]);
     }
+
+    /**
+     * @Route("/csv", name="csv")
+     */
+     public function csv(CSVImportWorker $csvReaderWorker):Response
+     {
+       $message = $csvReaderWorker->getHappyMessage();
+
+
+       return new Response('<h1>'.$message.'</h1>');
+     }
 }
