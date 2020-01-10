@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use App\Service\CSVReadFile;
+use App\Service\CSVFileValidation;
 
 
 class CSVImportWorker
@@ -24,10 +25,16 @@ class CSVImportWorker
     */
     private $csvReadFile;
 
-    public function __construct(EntityManagerInterface $em, CSVReadFile $csvReadFile)
+    /**
+    * @var CSVFileValidation
+    */
+    private $csvFileValidation;
+
+    public function __construct(EntityManagerInterface $em, CSVReadFile $csvReadFile, CSVFileValidation $csvFileValidation)
     {
         $this->em = $em;
         $this->csvReadFile = $csvReadFile;
+        $this->csvFileValidation = $csvFileValidation;
     }
 
     public function importProducts(InputInterface $input, OutputInterface $output)
@@ -36,8 +43,10 @@ class CSVImportWorker
       $io->title('Attempting import of Products...');
 
       $reader = $this->csvReadFile->read('%kernel.root_dir%/../src/Data/stock.csv');
-
-      $results = $reader->fetchAssoc();
+      //$validate = $this->csvReadFile->validate($reader);
+      $validate = $this->csvFileValidation->validate();
+      $errorMessage = $this->csvFileValidation->getErrorMessage();
+      $results = $validate->fetchAssoc();
       $total = iterator_count($results);
       $io->note("Found products: " .$total);
       $processed = 0;
@@ -59,6 +68,10 @@ class CSVImportWorker
       }
 
       $this->em->flush();
+      
+      if ($errorMessage) {
+        $io->warning($errorMessage);
+      }
       $io->warning($total - $processed.' items were skiped');
       $io->success($processed.' items imported seccessfuly!');
     }

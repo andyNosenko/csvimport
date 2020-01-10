@@ -4,6 +4,7 @@ use League\Csv\Reader;
 
 class CSVReadFile
 {
+  private $reader;
 
   function __construct()
   {
@@ -12,6 +13,10 @@ class CSVReadFile
 
   public function read(String $filePath)
   {
-    return $reader = Reader::createFromPath($filePath);
+    return $this->reader = Reader::createFromPath($filePath);
+  }
+
+  public function getReader() {
+    return $this->reader;
   }
 }
