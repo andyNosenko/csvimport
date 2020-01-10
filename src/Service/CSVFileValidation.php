@@ -30,12 +30,14 @@ class CSVFileValidation
 
   public function validate()
   {
-    $results = $this->csvReadFile->getReader()->fetchAssoc();
+    $results = $this->csvReadFile->getReader()->fetchOne();
 
     foreach ($results as $row) {
-      if(!$row['Product Code']) {
-        $this->setErrorMessage($row['Product Code']);
+
+      if($row != "Product Code") {
+        $this->setErrorMessage("Product Code field not found!");
       }
+
       break;
     }
     return $this->csvReadFile->getReader();
