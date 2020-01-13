@@ -56,7 +56,7 @@ class ProductController extends AbstractController
                         CSVFileValidation $csvFileValidation): Response
     {
         $csvImportWorker = new CSVImportWorker($em, $csvReadFile, $csvFileValidation);
-        $csvImportWorker->importProducts();
+        $csvImportWorker->importProducts('../src/Data/stock.csv');
 
         return new Response('<h1>Total items found: '.$csvImportWorker->getTotal().
             '<br>Items were skipped: '.$csvImportWorker->getSkipped().
@@ -66,7 +66,9 @@ class ProductController extends AbstractController
     /**
      * @Route("/test", name="test")
      */
-    public function test(Request $request)
+    public function test(Request $request, EntityManagerInterface $em,
+                        CSVReadFile $csvReadFile,
+                        CSVFileValidation $csvFileValidation)
     {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
@@ -84,7 +86,12 @@ class ProductController extends AbstractController
                     $fileName = $originalFilename.'.'.$file->guessExtension();
                 }
                 $file->move($destination, $fileName);
-                return new Response('<h1>Submitted!</h1>');
+
+                $csvImportWorker = new CSVImportWorker($em, $csvReadFile, $csvFileValidation);
+                $csvImportWorker->importProducts($destination.'/'.$fileName);
+                return new Response('<h1>Submitted!</h1><br><h1>Total items found: '.$csvImportWorker->getTotal().
+                    '<br>Items were skipped: '.$csvImportWorker->getSkipped().
+                    '<br>Items were processed: '.$csvImportWorker->getProcessed().'</h1>');
             } else {
                 return new Response('<h1>Only csv files allowed!</h1>');
             }
