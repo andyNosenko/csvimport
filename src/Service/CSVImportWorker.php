@@ -171,7 +171,7 @@ class CSVImportWorker
     {
         $email = (new Email())
             ->from("admin@test.com")
-            ->to("client@test.com")
+            ->to("eaff1fac09-eefa97@inbox.mailtrap.io")
             ->subject("Products import report")
             ->html('<h1>Submitted!</h1><br><h1>Total items found: ' . (String)$this->total .
                 '<br>Items were skipped: ' . (String)$this->skipped .
