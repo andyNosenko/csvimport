@@ -5,7 +5,7 @@ namespace App\Controller;
 
 use App\Form\CSVFileType;
 use App\Service\CSVFileValidation;
-use App\Service\CSVReadFile;
+use App\Service\CsvFileReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\CSVImportWorker;
@@ -47,12 +49,12 @@ class ProductController extends AbstractController
     /**
  * @Route("/csv", name="csv")
  * @param EntityManagerInterface $em
- * @param CSVReadFile $csvReadFile
+ * @param CsvFileReader $csvReadFile
  * @param CSVFileValidation $csvFileValidation
  * @return Response
  */
     public function csv(EntityManagerInterface $em,
-                        CSVReadFile $csvReadFile,
+                        CsvFileReader $csvReadFile,
                         CSVFileValidation $csvFileValidation): Response
     {
         $csvImportWorker = new CSVImportWorker($em, $csvReadFile, $csvFileValidation);
@@ -64,11 +66,17 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/test", name="test")
+     * @Route("/importfile", name="importfile")
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param CsvFileReader $csvReadFile
+     * @param CSVFileValidation $csvFileValidation
+     * @param MailerInterface $mailer
+     * @return Response
      */
-    public function test(Request $request, EntityManagerInterface $em,
-                        CSVReadFile $csvReadFile,
-                        CSVFileValidation $csvFileValidation)
+    public function csvImportAction(Request $request, EntityManagerInterface $em,
+                         CsvFileReader $csvReadFile,
+                         CSVFileValidation $csvFileValidation, MailerInterface $mailer)
     {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
@@ -87,8 +95,11 @@ class ProductController extends AbstractController
                 }
                 $file->move($destination, $fileName);
 
-                $csvImportWorker = new CSVImportWorker($em, $csvReadFile, $csvFileValidation);
+                $csvImportWorker = new CSVImportWorker($em, $csvReadFile, $csvFileValidation, $mailer);
                 $csvImportWorker->importProducts($destination.'/'.$fileName);
+
+                $csvImportWorker->sendEmail();
+
                 return new Response('<h1>Submitted!</h1><br><h1>Total items found: '.$csvImportWorker->getTotal().
                     '<br>Items were skipped: '.$csvImportWorker->getSkipped().
                     '<br>Items were processed: '.$csvImportWorker->getProcessed().'</h1>');

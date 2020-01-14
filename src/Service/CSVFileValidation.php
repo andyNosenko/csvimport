@@ -1,41 +1,66 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Service\CSVReadFile;
+use App\Service\CsvFileReader;
 
 class CSVFileValidation
 {
     /**
-     * @var CSVReadFile
+     * @var CsvFileReader
      */
     private $csvReadFile;
 
+    /**
+     * @var String
+     */
     private $errorMessage;
 
+    /**
+     * @var array
+     */
     private $validFieldsRule = ['Product Code', 'Product Name',
         'Product Description', 'Stock', 'Cost in GBP', 'Discontinued'];
 
-    public function setErrorMessage($errorMessage)
+    /**
+     * @param String $errorMessage
+     */
+    public function setErrorMessage(String $errorMessage)
     {
         $this->errorMessage = $errorMessage;
     }
 
+    /**
+     * @return String
+     */
     public function getErrorMessage()
     {
         return $this->errorMessage;
     }
 
-
-    function __construct(CSVReadFile $csvReadFile)
+    /**
+     * CSVFileValidation constructor.
+     * @param \App\Service\CsvFileReader $csvReadFile
+     */
+    function __construct(CsvFileReader $csvReadFile)
     {
         $this->csvReadFile = $csvReadFile;
     }
 
-    public function identical_fields($arrayA, $arrayB)
+    /**
+     * @param array $arrayA
+     * @param array $arrayB
+     * @return bool
+     */
+    public function identical_fields(Array $arrayA, Array $arrayB): bool
     {
         return $arrayA == $arrayB;
     }
+
+    /**
+     * @return \League\Csv\Reader
+     */
     public function validate()
     {
         $results = $this->csvReadFile->getReader()->fetchOne();

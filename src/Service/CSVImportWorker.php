@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\Product;
@@ -11,7 +13,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
-use App\Service\CSVReadFile;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Service\CsvFileReader;
 use App\Service\CSVFileValidation;
 
 
@@ -24,7 +28,7 @@ class CSVImportWorker
     private $em;
 
     /**
-     * @var CSVReadFile
+     * @var CsvFileReader
      */
     private $csvReadFile;
 
@@ -33,30 +37,44 @@ class CSVImportWorker
      */
     private $csvFileValidation;
 
+    /**
+     * @var int
+     */
     private $total;
 
+    /**
+     * @var int
+     */
     private $processed;
 
+    /**
+     * @var int
+     */
     private $skipped;
 
     /**
-     * @return mixed
+     * @var MailerInterface
      */
-    public function getSkipped()
+    private $mailer;
+
+    /**
+     * @return int
+     */
+    public function getSkipped(): int
     {
         return $this->skipped;
     }
 
     /**
-     * @param mixed $skipped
+     * @param int $skipped
      */
-    public function setSkipped($skipped): void
+    public function setSkipped(int $skipped)
     {
         $this->skipped = $skipped;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getProcessed()
     {
@@ -64,123 +82,101 @@ class CSVImportWorker
     }
 
     /**
-     * @param mixed $processed
+     * @param int $processed
      */
-    public function setProcessed($processed): void
+    public function setProcessed(int $processed)
     {
         $this->processed = $processed;
     }
 
+    /**
+     * @return int
+     */
     public function getTotal()
     {
         return $this->total;
     }
 
-    public function setTotal($total)
+    /**
+     * @param $total
+     */
+    public function setTotal(int $total)
     {
         $this->total = $total;
     }
 
-    public function __construct(EntityManagerInterface $em, CSVReadFile $csvReadFile, CSVFileValidation $csvFileValidation)
+    /**
+     * CSVImportWorker constructor.
+     * @param EntityManagerInterface $em
+     * @param \App\Service\CsvFileReader $csvReadFile
+     * @param \App\Service\CSVFileValidation $csvFileValidation
+     * @param MailerInterface $mailer
+     */
+    public function __construct(EntityManagerInterface $em, CsvFileReader $csvReadFile,
+                                CSVFileValidation $csvFileValidation, MailerInterface $mailer
+    )
     {
         $this->em = $em;
         $this->csvReadFile = $csvReadFile;
         $this->csvFileValidation = $csvFileValidation;
+        $this->mailer = $mailer;
     }
 
-   public function importProducts(InputInterface $input, OutputInterface $output)
-   {
-       $io = new SymfonyStyle($input, $output);
-       $io->title('Attempting import of Products...');
+    public function importProducts($path)
+    {
+        //$path = 'C:\Projects\Itransition\OpenServer\OSPanel\domains\csvimport\src\Data\stock.csv';
+        //$path = '../src/Data/stock.csv';
+        $this->csvReadFile->read($path);
+        $validate = $this->csvFileValidation->validate();
+        $results = $validate->fetchAssoc();
+        $this->setTotal(iterator_count($results));
 
-       $this->csvReadFile->read('%kernel.root_dir%/../src/Data/stock.csv');
-       //$validate = $this->csvReadFile->validate($reader);
-       $validate = $this->csvFileValidation->validate();
-       $errorMessage = $this->csvFileValidation->getErrorMessage();
-       $results = $validate->fetchAssoc();
-       $total = iterator_count($results);
-       $io->note("Found products: " . $total);
-       $processed = 0;
+        if (!$this->stopImportProducts()) {
+            $this->importToDatabase($results);
+        }
+    }
 
-       if (!$errorMessage) {
+    public function importToDatabase($results)
+    {
+        $processed = 0;
+        foreach ($results as $row) {
+            if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
+                if ($row['Cost in GBP'] <= 1000) {
+                    $product = (new Product())
+                        ->setProductCode($row['Product Code'])
+                        ->setProductName($row['Product Name'])
+                        ->setProductDescription($row['Product Description'])
+                        ->setStock((int)$row['Stock'])
+                        ->setCost((int)$row['Cost in GBP'])
+                        ->setDiscontinued($row['Discontinued']);
 
-         $table = new Table($output);
-         $table->setHeaders(['Product Code', 'Product Name', 'Product Description', 'Stock', 'Cost in GBP', 'Discontinued']);
+                    $this->em->persist($product);
+                    $processed++;
+                }
+            }
+        }
 
-           foreach ($results as $row) {
-               if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
-                   if ($row['Cost in GBP'] <= 1000) {
-                       $product = (new Product())
-                           ->setProductCode($row['Product Code'])
-                           ->setProductName($row['Product Name'])
-                           ->setProductDescription($row['Product Description'])
-                           ->setStock((int)$row['Stock'])
-                           ->setCost((int)$row['Cost in GBP'])
-                           ->setDiscontinued($row['Discontinued']);
+        $this->setProcessed($processed);
+        $this->setSkipped($this->getTotal() - $this->getProcessed());
+        $this->em->flush();
+    }
 
-                       $this->em->persist($product);
-                       $processed++;
-                   }
-               } else {
-                  $table->setRows([
-                      [
-                        $row['Product Code'],
-                        $row['Product Name'],
-                        $row['Product Description'],
-                        $row['Stock'],
-                        $row['Cost in GBP'],
-                        $row['Discontinued']
-                      ]
-                  ]);
-                  $table->render();
-               }
-           }
-       } else {
-           $io->warning($errorMessage);
-       }
+    public function stopImportProducts()
+    {
+        return $this->csvFileValidation->getErrorMessage();
+    }
 
-       $this->em->flush();
 
-       $io->warning($total - $processed . ' items were skiped');
-       $io->success($processed . ' items imported seccessfuly!');
-   }
+    public function sendEmail()
+    {
+        $email = (new Email())
+            ->from("admin@test.com")
+            ->to("client@test.com")
+            ->subject("Products import report")
+            ->html('<h1>Submitted!</h1><br><h1>Total items found: ' . (String)$this->total .
+                '<br>Items were skipped: ' . (String)$this->skipped .
+                '<br>Items were processed: ' . (String)$this->processed . '</h1>');
 
-    // public function importProducts($path)
-    // {
-    //     //$path = 'C:\Projects\Itransition\OpenServer\OSPanel\domains\csvimport\src\Data\stock.csv';
-    //     //$path = '../src/Data/stock.csv';
-    //     $this->csvReadFile->read($path);
-    //     //$validate = $this->csvReadFile->validate($reader);
-    //     $validate = $this->csvFileValidation->validate();
-    //     $errorMessage = $this->csvFileValidation->getErrorMessage();
-    //     $results = $validate->fetchAssoc();
-    //     $this->setTotal(iterator_count($results));
-    //     $processed = 0;
-    //
-    //     if (!$errorMessage) {
-    //         foreach ($results as $row) {
-    //             if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
-    //                 if ($row['Cost in GBP'] <= 1000) {
-    //                     $product = (new Product())
-    //                         ->setProductCode($row['Product Code'])
-    //                         ->setProductName($row['Product Name'])
-    //                         ->setProductDescription($row['Product Description'])
-    //                         ->setStock((int)$row['Stock'])
-    //                         ->setCost((int)$row['Cost in GBP'])
-    //                         ->setDiscontinued($row['Discontinued']);
-    //
-    //                     $this->em->persist($product);
-    //                     $processed++;
-    //                 }
-    //             }
-    //         }
-    //     } else {
-    //
-    //     }
-    //     $this->setProcessed($processed);
-    //     $this->setSkipped($this->getTotal() - $this->getProcessed());
-    //     $this->em->flush();
-    //
-    //
-    // }
+        $sendEmail = $this->mailer->send($email);
+    }
 }

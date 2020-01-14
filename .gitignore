@@ -9,4 +9,5 @@
 /vendor/
 /public/.htaccess
 .idea
+.env
 ###< symfony/framework-bundle ###
