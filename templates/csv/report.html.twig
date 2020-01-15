@@ -1,0 +1,11 @@
+{% extends "base.html.twig" %}
+{% block title %}Report{% endblock %}
+{% block body %}
+    <h1>Submitted!</h1>
+    <br>
+    <h1>Total items found: {{ total }}</h1>
+    <br>
+    <h1>Items were skipped: {{ skipped }}</h1>
+    <br>
+    <h1>Items were processed: {{ processed }}</h1>
+{% endblock %}

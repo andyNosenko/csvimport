@@ -6,17 +6,8 @@ namespace App\Service;
 
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Helper\Table;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use App\Service\CsvFileReader;
-use App\Service\CSVFileValidation;
 
 
 class CSVImportWorker
@@ -122,7 +113,7 @@ class CSVImportWorker
         $this->mailer = $mailer;
     }
 
-    public function importProducts($path)
+    public function importProducts($path, $isTest)
     {
         //$path = 'C:\Projects\Itransition\OpenServer\OSPanel\domains\csvimport\src\Data\stock.csv';
         //$path = '../src/Data/stock.csv';
@@ -132,25 +123,29 @@ class CSVImportWorker
         $this->setTotal(iterator_count($results));
 
         if (!$this->stopImportProducts()) {
-            $this->importToDatabase($results);
+            $this->importToDatabase($results, $isTest);
         }
     }
 
-    public function importToDatabase($results)
+    public function importToDatabase($results, $isTest)
     {
         $processed = 0;
         foreach ($results as $row) {
             if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
                 if ($row['Cost in GBP'] <= 1000) {
-                    $product = (new Product())
-                        ->setProductCode($row['Product Code'])
-                        ->setProductName($row['Product Name'])
-                        ->setProductDescription($row['Product Description'])
-                        ->setStock((int)$row['Stock'])
-                        ->setCost((int)$row['Cost in GBP'])
-                        ->setDiscontinued($row['Discontinued']);
+                    if (!$isTest) {
+                        $product = (new Product())
+                            ->setProductCode($row['Product Code'])
+                            ->setProductName($row['Product Name'])
+                            ->setProductDescription($row['Product Description'])
+                            ->setStock((int)$row['Stock'])
+                            ->setCost((int)$row['Cost in GBP'])
+                            ->setDiscontinued($row['Discontinued']);
 
-                    $this->em->persist($product);
+                        $this->em->persist($product);
+                        $this->em->flush();
+                    }
+
                     $processed++;
                 }
             }
@@ -158,7 +153,7 @@ class CSVImportWorker
 
         $this->setProcessed($processed);
         $this->setSkipped($this->getTotal() - $this->getProcessed());
-        $this->em->flush();
+
     }
 
     public function stopImportProducts()
@@ -169,14 +164,17 @@ class CSVImportWorker
 
     public function sendEmail()
     {
-        $email = (new Email())
+        $email = (new TemplatedEmail())
             ->from("admin@test.com")
             ->to("eaff1fac09-eefa97@inbox.mailtrap.io")
             ->subject("Products import report")
-            ->html('<h1>Submitted!</h1><br><h1>Total items found: ' . (String)$this->total .
-                '<br>Items were skipped: ' . (String)$this->skipped .
-                '<br>Items were processed: ' . (String)$this->processed . '</h1>');
+            ->htmlTemplate("csv/report.html.twig")
+            ->context([
+                'total' => $this->getTotal(),
+                'skipped' => $this->getSkipped(),
+                'processed' => $this->getProcessed(),
+            ]);
 
-        $sendEmail = $this->mailer->send($email);
+        $this->mailer->send($email);
     }
 }

@@ -31,8 +31,8 @@ class CsvImportCommand extends Command
     {
         $this
             ->setDescription('Import CSV file into database')
-            ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description');
+            ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...', "stock.csv")
+            ->addOption('test', null, InputOption::VALUE_NONE, 'Test execution without database insertion');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -41,8 +41,15 @@ class CsvImportCommand extends Command
         $io->title('Attempting import of Products...');
         $workFolder = '/home/ITRANSITION.CORP/a.nosenko/Documents/Projects/CSVimport/src/Data/';
 
-        $input->getArgument("file_name") ? $file = $input->getArgument("file_name") : $file = "stock.csv";
-        $this->csvImportWorker->importProducts($workFolder.$file);
+        $file = $input->getArgument("file_name");
+
+        if($input->getOption("test")) {
+            $this->csvImportWorker->importProducts($workFolder.$file, true);
+        } else {
+            $this->csvImportWorker->importProducts($workFolder.$file, false);
+            $this->csvImportWorker->sendEmail();
+        }
+
 
         $io->note("Found products: " . $this->csvImportWorker->getTotal());
         $io->warning($this->csvImportWorker->getSkipped() . ' items were skiped');
