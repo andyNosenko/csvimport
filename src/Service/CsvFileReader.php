@@ -30,3 +30,4 @@ class CsvFileReader
         return $this->reader;
     }
 }
+

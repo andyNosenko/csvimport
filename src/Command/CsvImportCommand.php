@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Service\CSVImportWorker;
+use App\Service\CSVMailSender;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,14 +31,21 @@ class CsvImportCommand extends Command
     private $csvImportWorker;
 
     /**
+     * @var CSVMailSender
+     */
+    private $csvMailSender;
+
+    /**
      * @param CSVImportWorker $csvImportWorker
+     * @param CSVMailSender $csvMailSender
      * @param String $targetDirectory
      */
-    public function __construct(CSVImportWorker $csvImportWorker, String $targetDirectory)
+    public function __construct(CSVImportWorker $csvImportWorker, CSVMailSender $csvMailSender, String $targetDirectory)
     {
         parent::__construct();
 
         $this->csvImportWorker = $csvImportWorker;
+        $this->csvMailSender = $csvMailSender;
         $this->targetDirectory = $targetDirectory;
     }
 
@@ -66,7 +74,7 @@ class CsvImportCommand extends Command
             $this->csvImportWorker->importProducts($this->targetDirectory . $file, true);
         } else {
             $this->csvImportWorker->importProducts($this->targetDirectory . $file, false);
-            $this->csvImportWorker->sendEmail();
+            $this->csvMailSender->sendEmail($this->csvImportWorker);
         }
 
 
@@ -77,3 +85,4 @@ class CsvImportCommand extends Command
         return 0;
     }
 }
+

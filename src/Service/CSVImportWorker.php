@@ -6,8 +6,6 @@ namespace App\Service;
 
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mailer\MailerInterface;
 
 class CSVImportWorker
 {
@@ -43,42 +41,18 @@ class CSVImportWorker
     public $skipped;
 
     /**
-     * @var MailerInterface
-     */
-    private $mailer;
-
-    /**
-     * @var String
-     */
-    private $senderEmail;
-
-    /**
-     * @var String
-     */
-    private $recipientEmail;
-
-    /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvReadFile
      * @param \App\Service\CSVFileValidation $csvFileValidation
-     * @param MailerInterface $mailer
-     * @param String $senderEmail
-     * @param String $recipientEmail
      */
     public function __construct(
         EntityManagerInterface $em,
         CsvFileReader $csvReadFile,
-        CSVFileValidation $csvFileValidation,
-        MailerInterface $mailer,
-        String $senderEmail,
-        String $recipientEmail
+        CSVFileValidation $csvFileValidation
     ) {
         $this->em = $em;
         $this->csvReadFile = $csvReadFile;
         $this->csvFileValidation = $csvFileValidation;
-        $this->mailer = $mailer;
-        $this->senderEmail = $senderEmail;
-        $this->recipientEmail = $recipientEmail;
     }
 
     /**
@@ -147,24 +121,5 @@ class CSVImportWorker
         }
         return false;
     }
-
-
-    /**
-     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
-     */
-    public function sendEmail():void
-    {
-        $email = (new TemplatedEmail())
-            ->from($this->senderEmail)
-            ->to($this->recipientEmail)
-            ->subject("Products import report")
-            ->htmlTemplate("csv/report.html.twig")
-            ->context([
-                'total' => $this->total,
-                'skipped' => $this->skipped,
-                'processed' => $this->processed,
-            ]);
-
-        $this->mailer->send($email);
-    }
 }
+

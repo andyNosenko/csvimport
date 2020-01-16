@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Form\CSVFileType;
 use App\Service\CSVImportWorker;
+use App\Service\CSVMailSender;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +19,11 @@ class ProductController extends AbstractController
      * @Route("/importfile", name="importfile")
      * @param Request $request
      * @param CSVImportWorker $csvImportWorker
+     * @param CSVMailSender $csvMailSender
      * @return Response
      * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
-    public function csvImportAction(Request $request, CSVImportWorker $csvImportWorker)
+    public function csvImportAction(Request $request, CSVImportWorker $csvImportWorker, CSVMailSender $csvMailSender)
     {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
@@ -41,7 +43,7 @@ class ProductController extends AbstractController
 
                 $csvImportWorker->importProducts($destination . '/' . $fileName, false);
 
-                $csvImportWorker->sendEmail();
+                $csvMailSender->sendEmail($csvImportWorker);
 
                 return $this->render("csv/report.html.twig", [
                     'total' => $csvImportWorker->total,
@@ -57,3 +59,4 @@ class ProductController extends AbstractController
         ]);
     }
 }
+
