@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Form\CSVFileType;
@@ -42,9 +44,9 @@ class ProductController extends AbstractController
                 $csvImportWorker->sendEmail();
 
                 return $this->render("csv/report.html.twig", [
-                    'total' => $csvImportWorker->getTotal(),
-                    'skipped' => $csvImportWorker->getSkipped(),
-                    'processed' => $csvImportWorker->getProcessed(),
+                    'total' => $csvImportWorker->total,
+                    'skipped' => $csvImportWorker->skipped,
+                    'processed' => $csvImportWorker->processed,
                 ]);
             } else {
                 return $this->render("csv/fileExtensionError.html.twig");

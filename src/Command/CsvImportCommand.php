@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Command;
@@ -29,7 +30,6 @@ class CsvImportCommand extends Command
     private $csvImportWorker;
 
     /**
-     * CsvImportCommand constructor.
      * @param CSVImportWorker $csvImportWorker
      * @param String $targetDirectory
      */
@@ -70,9 +70,9 @@ class CsvImportCommand extends Command
         }
 
 
-        $io->note("Found products: " . $this->csvImportWorker->getTotal());
-        $io->warning($this->csvImportWorker->getSkipped() . ' items were skiped');
-        $io->success($this->csvImportWorker->getProcessed() . ' items imported seccessfuly!');
+        $io->note("Found products: " . $this->csvImportWorker->total);
+        $io->warning($this->csvImportWorker->skipped . ' items were skiped');
+        $io->success($this->csvImportWorker->processed . ' items imported seccessfuly!');
 
         return 0;
     }

@@ -14,7 +14,7 @@ class CSVFileValidation
     /**
      * @var String
      */
-    private $errorMessage;
+    public $errorMessage;
 
     /**
      * @var array
@@ -29,23 +29,6 @@ class CSVFileValidation
     ];
 
     /**
-     * @param String $errorMessage
-     */
-    public function setErrorMessage(String $errorMessage)
-    {
-        $this->errorMessage = $errorMessage;
-    }
-
-    /**
-     * @return String
-     */
-    public function getErrorMessage()
-    {
-        return $this->errorMessage;
-    }
-
-    /**
-     * CSVFileValidation constructor.
      * @param \App\Service\CsvFileReader $csvFileReader
      */
     function __construct(CsvFileReader $csvFileReader)

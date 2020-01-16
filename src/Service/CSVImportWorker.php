@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Service;
 
 use App\Entity\Product;
@@ -28,17 +30,17 @@ class CSVImportWorker
     /**
      * @var int
      */
-    private $total;
+    public $total;
 
     /**
      * @var int
      */
-    private $processed;
+    public $processed;
 
     /**
      * @var int
      */
-    private $skipped;
+    public $skipped;
 
     /**
      * @var MailerInterface
@@ -56,55 +58,6 @@ class CSVImportWorker
     private $recipientEmail;
 
     /**
-     * @return int
-     */
-    public function getSkipped(): int
-    {
-        return $this->skipped;
-    }
-
-    /**
-     * @param int $skipped
-     */
-    public function setSkipped(int $skipped)
-    {
-        $this->skipped = $skipped;
-    }
-
-    /**
-     * @return int
-     */
-    public function getProcessed()
-    {
-        return $this->processed;
-    }
-
-    /**
-     * @param int $processed
-     */
-    public function setProcessed(int $processed)
-    {
-        $this->processed = $processed;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTotal()
-    {
-        return $this->total;
-    }
-
-    /**
-     * @param $total
-     */
-    public function setTotal(int $total)
-    {
-        $this->total = $total;
-    }
-
-    /**
-     * CSVImportWorker constructor.
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvReadFile
      * @param \App\Service\CSVFileValidation $csvFileValidation
@@ -137,7 +90,7 @@ class CSVImportWorker
         $this->csvReadFile->read($path);
         $validate = $this->csvFileValidation->validate();
         $results = $validate->fetchAssoc();
-        $this->setTotal(iterator_count($results));
+        $this->total = iterator_count($results);
 
         if (!$this->stopImportProducts()) {
             $this->importToDatabase($results, $isTest);
@@ -169,7 +122,7 @@ class CSVImportWorker
                 }
             }
 
-        $this->setSkipped($this->getTotal() - $this->getProcessed());
+        $this->skipped = $this->total - $this->processed;
 
     }
 
@@ -178,7 +131,7 @@ class CSVImportWorker
      */
     public function stopImportProducts()
     {
-        return $this->csvFileValidation->getErrorMessage();
+        return $this->csvFileValidation->errorMessage;
     }
 
     /**
@@ -207,9 +160,9 @@ class CSVImportWorker
             ->subject("Products import report")
             ->htmlTemplate("csv/report.html.twig")
             ->context([
-                'total' => $this->getTotal(),
-                'skipped' => $this->getSkipped(),
-                'processed' => $this->getProcessed(),
+                'total' => $this->total,
+                'skipped' => $this->skipped,
+                'processed' => $this->processed,
             ]);
 
         $this->mailer->send($email);
