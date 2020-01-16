@@ -1,13 +1,11 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Service;
 
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
-
 
 class CSVImportWorker
 {
@@ -121,8 +119,7 @@ class CSVImportWorker
         MailerInterface $mailer,
         String $senderEmail,
         String $recipientEmail
-    )
-    {
+    ) {
         $this->em = $em;
         $this->csvReadFile = $csvReadFile;
         $this->csvFileValidation = $csvFileValidation;

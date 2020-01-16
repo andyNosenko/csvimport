@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace App\Service;
 
 use App\Service\CsvFileReader;
@@ -10,7 +9,7 @@ class CSVFileValidation
     /**
      * @var CsvFileReader
      */
-    private $csvReadFile;
+    private $csvFileReader;
 
     /**
      * @var String
@@ -20,8 +19,14 @@ class CSVFileValidation
     /**
      * @var array
      */
-    private $validFieldsRule = ['Product Code', 'Product Name',
-        'Product Description', 'Stock', 'Cost in GBP', 'Discontinued'];
+    private $validFieldsRule = [
+        'Product Code',
+        'Product Name',
+        'Product Description',
+        'Stock',
+        'Cost in GBP',
+        'Discontinued'
+    ];
 
     /**
      * @param String $errorMessage
@@ -41,11 +46,11 @@ class CSVFileValidation
 
     /**
      * CSVFileValidation constructor.
-     * @param \App\Service\CsvFileReader $csvReadFile
+     * @param \App\Service\CsvFileReader $csvFileReader
      */
-    function __construct(CsvFileReader $csvReadFile)
+    function __construct(CsvFileReader $csvFileReader)
     {
-        $this->csvReadFile = $csvReadFile;
+        $this->csvFileReader = $csvFileReader;
     }
 
     /**
@@ -63,14 +68,17 @@ class CSVFileValidation
      */
     public function validate()
     {
-        $results = $this->csvReadFile->getReader()->fetchOne();
+        $results = $this->csvFileReader->getReader()->fetchOne();
         $csvFields = [];
+
         foreach ($results as $row) {
             array_push($csvFields, $row);
         }
+
         if ($this->identical_fields($this->validFieldsRule, $csvFields)) {
-            return $this->csvReadFile->getReader();
+            return $this->csvFileReader->getReader();
         }
 
     }
 }
+

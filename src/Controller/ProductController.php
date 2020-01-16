@@ -2,7 +2,6 @@
 declare(strict_types=1);
 namespace App\Controller;
 
-
 use App\Form\CSVFileType;
 use App\Service\CSVImportWorker;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,12 +17,12 @@ class ProductController extends AbstractController
      * @param Request $request
      * @param CSVImportWorker $csvImportWorker
      * @return Response
+     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
     public function csvImportAction(Request $request, CSVImportWorker $csvImportWorker)
     {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form["file"]->getData();
             $extension = $file->guessExtension();
@@ -34,7 +33,7 @@ class ProductController extends AbstractController
                 if ($extension == "txt") {
                     $fileName = $originalFilename . '.' . 'csv';
                 } else {
-                    $fileName = $originalFilename . '.' . $file->guessExtension();
+                    $fileName = $originalFilename . '.' . $extension;
                 }
                 $file->move($destination, $fileName);
 
@@ -48,7 +47,7 @@ class ProductController extends AbstractController
                     'processed' => $csvImportWorker->getProcessed(),
                 ]);
             } else {
-                return new Response('<h1>Only csv files allowed!</h1>');
+                return $this->render("csv/fileExtensionError.html.twig");
             }
         }
         return $this->render('csv/index.html.twig', [
