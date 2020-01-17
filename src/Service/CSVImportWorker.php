@@ -9,7 +9,6 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class CSVImportWorker
 {
-
     /**
      * @var EntityManagerInterface
      */
@@ -18,7 +17,7 @@ class CSVImportWorker
     /**
      * @var CsvFileReader
      */
-    private $csvReadFile;
+    private $csvFileReader;
 
     /**
      * @var CSVFileValidation
@@ -42,16 +41,16 @@ class CSVImportWorker
 
     /**
      * @param EntityManagerInterface $em
-     * @param \App\Service\CsvFileReader $csvReadFile
+     * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidation $csvFileValidation
      */
     public function __construct(
         EntityManagerInterface $em,
-        CsvFileReader $csvReadFile,
+        CsvFileReader $csvFileReader,
         CSVFileValidation $csvFileValidation
     ) {
         $this->em = $em;
-        $this->csvReadFile = $csvReadFile;
+        $this->csvFileReader = $csvFileReader;
         $this->csvFileValidation = $csvFileValidation;
     }
 
@@ -61,13 +60,13 @@ class CSVImportWorker
      */
     public function importProducts(String $path, Bool $isTest)
     {
-        $this->csvReadFile->read($path);
-        $validate = $this->csvFileValidation->validate();
-        $results = $validate->fetchAssoc();
-        $this->total = iterator_count($results);
-
+        $results = null;
+        if ($this->csvFileValidation->validate($this->csvFileReader->read($path))) {
+            $results = $this->csvFileReader->getReader();
+            $this->total = iterator_count($results->fetchAssoc());
+        }
         if (!$this->stopImportProducts()) {
-            $this->importToDatabase($results, $isTest);
+            $this->importToDatabase($results->fetchAssoc(), $isTest);
         }
     }
 
@@ -109,10 +108,10 @@ class CSVImportWorker
     }
 
     /**
-     * @param $row
+     * @param array $row
      * @return bool
      */
-    public function importProductRequirements($row): bool
+    public function importProductRequirements(Array $row): bool
     {
         if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
             if ($row['Cost in GBP'] <= 1000) {

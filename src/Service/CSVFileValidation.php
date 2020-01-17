@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Service\CsvFileReader;
+use League\Csv\Reader;
 
 class CSVFileValidation
 {
@@ -49,11 +49,12 @@ class CSVFileValidation
     }
 
     /**
-     * @return \League\Csv\Reader
+     * @param Reader $reader
+     * @return bool
      */
-    public function validate()
+    public function validate(Reader $reader): bool
     {
-        $results = $this->csvFileReader->getReader()->fetchOne();
+        $results = $reader->fetchOne();
         $csvFields = [];
 
         foreach ($results as $row) {
@@ -61,9 +62,9 @@ class CSVFileValidation
         }
 
         if ($this->identical_fields($this->validFieldsRule, $csvFields)) {
-            return $this->csvFileReader->getReader();
+            return true;
         }
-
+        return false;
     }
 }
 
