@@ -10,4 +10,5 @@
 /public/.htaccess
 .idea
 .env
+/config/parameters.yaml
 ###< symfony/framework-bundle ###

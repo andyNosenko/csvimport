@@ -54,7 +54,7 @@ class CsvImportCommand extends Command
         $this
             ->setDescription('Import CSV file into database')
             ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...', "stock.csv")
-            ->addOption('test', null, InputOption::VALUE_NONE, 'Test execution without database insertion');
+            ->addOption('test', null, InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
     }
 
     /**
@@ -70,12 +70,15 @@ class CsvImportCommand extends Command
 
         $file = $input->getArgument("file_name");
 
-        if ($input->getOption("test")) {
-            $this->csvImportWorker->importProducts($this->targetDirectory . $file, true);
-        } else {
-            $this->csvImportWorker->importProducts($this->targetDirectory . $file, false);
-            $this->csvMailSender->sendEmail($this->csvImportWorker);
-        }
+        $test = $input->getOption("test");
+        $this->csvImportWorker->importProducts($this->targetDirectory . $file, (bool)$test == false);
+        //$this->csvMailSender->sendEmail($this->csvImportWorker, (bool)$test==false);
+        $this->csvMailSender->sendEmail([
+            'total' => $this->csvImportWorker->total,
+            'skipped' => $this->csvImportWorker->skipped,
+            'processed' => $this->csvImportWorker->processed,
+            'products' => $this->csvImportWorker->products
+        ], (bool)$test == false);
 
 
         $io->note("Found products: " . $this->csvImportWorker->total);

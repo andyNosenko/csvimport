@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
 
+imports:
+    - { resource: parameters.yaml }
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -32,5 +35,5 @@ services:
 
     App\Service\CSVMailSender:
         arguments:
-            $senderEmail: 'admin@test.com'
-            $recipientEmail: 'eaff1fac09-eefa97@inbox.mailtrap.io'
+            $senderEmail: '%adminBox%'
+            $recipientEmail: '%recipientBox%'

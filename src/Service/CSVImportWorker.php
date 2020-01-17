@@ -40,6 +40,11 @@ class CSVImportWorker
     public $skipped;
 
     /**
+     * @var \ArrayObject
+     */
+    public $products;
+
+    /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidation $csvFileValidation
@@ -52,12 +57,14 @@ class CSVImportWorker
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
         $this->csvFileValidation = $csvFileValidation;
+        $this->products = new \ArrayObject();
     }
 
     /**
      * @param String $path
      * @param bool $isTest
      */
+    //TODO: Instead String path Reader object
     public function importProducts(String $path, Bool $isTest)
     {
         $results = null;
@@ -77,7 +84,7 @@ class CSVImportWorker
     public function importToDatabase(\Iterator $results, Bool $isTest): void
     {
         foreach ($results as $row) {
-            if ($this->importProductRequirements($row)) {
+            if ($this->checkRequirements($row)) {
                     $product = (new Product())
                         ->setProductCode($row['Product Code'])
                         ->setProductName($row['Product Name'])
@@ -87,6 +94,7 @@ class CSVImportWorker
                         ->setDiscontinued($row['Discontinued']);
 
                     $this->em->persist($product);
+                    $this->products->append($product);
                     if (!$isTest) {
                         $this->em->flush();
                     }
@@ -102,6 +110,7 @@ class CSVImportWorker
     /**
      * @return String
      */
+    //TODO: Will be unused after importProducts() refactoring
     public function stopImportProducts()
     {
         return $this->csvFileValidation->errorMessage;
@@ -111,14 +120,9 @@ class CSVImportWorker
      * @param array $row
      * @return bool
      */
-    public function importProductRequirements(Array $row): bool
+    public function checkRequirements(Array $row): bool
     {
-        if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
-            if ($row['Cost in GBP'] <= 1000) {
-                return true;
-            }
-        }
-        return false;
+        return $row['Cost in GBP'] > 5 && $row['Cost in GBP'] <= 1000 && $row['Stock'] > 10;
     }
 }
 
