@@ -1,6 +1,20 @@
 {% extends "base.html.twig" %}
 {% block title %}Report{% endblock %}
 {% block body %}
+    <style>
+        table, th, td {
+            border-collapse: collapse;
+            border: 1px solid black;
+
+        }
+        table {
+            width: 100%;
+        }
+
+        th {
+            height: 50px;
+        }
+    </style>
     <h1>Submitted!</h1>
     <br>
     <h1>Total items found: {{ total }}</h1>
@@ -8,4 +22,24 @@
     <h1>Items were skipped: {{ skipped }}</h1>
     <br>
     <h1>Items were processed: {{ processed }}</h1>
+    <table>
+        <tr>
+            <th>Product Code</th>
+            <th>Product Name</th>
+            <th>Product Description</th>
+            <th>Stock</th>
+            <th>Cost in GBP</th>
+            <th>Discontinued</th>
+        </tr>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.productCode }}</td>
+                <td>{{ product.productName }}</td>
+                <td>{{ product.productDescription }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ product.cost }}</td>
+                <td>{{ product.discontinued }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

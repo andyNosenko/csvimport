@@ -40,6 +40,11 @@ class CSVImportWorker
     public $skipped;
 
     /**
+     * @var \ArrayObject
+     */
+    public $products;
+
+    /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidation $csvFileValidation
@@ -48,10 +53,12 @@ class CSVImportWorker
         EntityManagerInterface $em,
         CsvFileReader $csvFileReader,
         CSVFileValidation $csvFileValidation
-    ) {
+    )
+    {
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
         $this->csvFileValidation = $csvFileValidation;
+        $this->products = new \ArrayObject();
     }
 
     /**
@@ -78,22 +85,23 @@ class CSVImportWorker
     {
         foreach ($results as $row) {
             if ($this->importProductRequirements($row)) {
-                    $product = (new Product())
-                        ->setProductCode($row['Product Code'])
-                        ->setProductName($row['Product Name'])
-                        ->setProductDescription($row['Product Description'])
-                        ->setStock((int)$row['Stock'])
-                        ->setCost((int)$row['Cost in GBP'])
-                        ->setDiscontinued($row['Discontinued']);
+                $product = (new Product())
+                    ->setProductCode($row['Product Code'])
+                    ->setProductName($row['Product Name'])
+                    ->setProductDescription($row['Product Description'])
+                    ->setStock((int)$row['Stock'])
+                    ->setCost((int)$row['Cost in GBP'])
+                    ->setDiscontinued($row['Discontinued']);
 
-                    $this->em->persist($product);
-                    if (!$isTest) {
-                        $this->em->flush();
-                    }
-
-                    $this->processed++;
+                $this->em->persist($product);
+                $this->products->append($product);
+                if (!$isTest) {
+                    $this->em->flush();
                 }
+
+                $this->processed++;
             }
+        }
 
         $this->skipped = $this->total - $this->processed;
 

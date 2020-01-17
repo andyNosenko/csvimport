@@ -49,6 +49,7 @@ class ProductController extends AbstractController
                     'total' => $csvImportWorker->total,
                     'skipped' => $csvImportWorker->skipped,
                     'processed' => $csvImportWorker->processed,
+                    'products' => $csvImportWorker->products,
                 ]);
             } else {
                 return $this->render("csv/fileExtensionError.html.twig");

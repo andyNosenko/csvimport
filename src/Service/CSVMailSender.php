@@ -63,6 +63,7 @@ class CSVMailSender
                 'total' => $csvImportWorker->total,
                 'skipped' => $csvImportWorker->skipped,
                 'processed' => $csvImportWorker->processed,
+                'products' => $csvImportWorker->products
             ]);
 
         $this->mailer->send($email);
