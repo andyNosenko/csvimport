@@ -14,9 +14,14 @@ class CSVFileValidation
     private $csvFileReader;
 
     /**
-     * @var String
+     * @var array
      */
-    public $errorMessage;
+    public $errorMessage = [];
+
+    /**
+     * @var bool
+     */
+    public $isStopped = false;
 
     /**
      * @var array
@@ -65,6 +70,49 @@ class CSVFileValidation
             return true;
         }
         return false;
+    }
+
+    public function validateDataFields(\Iterator $data_fields): void
+    {
+        foreach ($data_fields as $row) {
+            $this->isCorrectProductCodeField($row['Product Code']);
+            $this->isCorrectStringField($row['Product Name']);
+            $this->isCorrectStringField($row['Product Description']);
+            $this->isCorrectNumericField($row['Stock']);
+            $this->isCorrectNumericField($row['Cost in GBP']);
+        }
+
+//        foreach ($this->errorMessage as $message) {
+//            var_dump($message);
+//        }
+    }
+
+    public function isCorrectNumericField($field): void
+    {
+        if ($field == "") {
+            array_push($this->errorMessage, $field." Empty value\n");
+            $this->isStopped = true;
+        }
+        elseif ((float)$field == 0 || (int)$field == 0) {
+            array_push($this->errorMessage, $field." String value instead number\n");
+            $this->isStopped = true;
+        }
+    }
+
+    public function isCorrectStringField($field): void
+    {
+        if(preg_match('/^\d+$/', $field)) {
+            array_push($this->errorMessage, $field." Numeric value provided instead string\n");
+            $this->isStopped = true;
+        }
+    }
+
+    public function isCorrectProductCodeField($field): void
+    {
+        if(!preg_match('/^[P]/', $field)) {
+           array_push($this->errorMessage, $field." String must began from 'P' character\n");
+           $this->isStopped = true;
+        }
     }
 }
 

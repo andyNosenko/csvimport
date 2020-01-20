@@ -72,7 +72,8 @@ class CSVImportWorker
             $results = $this->csvFileReader->getReader();
             $this->total = iterator_count($results->fetchAssoc());
         }
-        if (!$this->stopImportProducts()) {
+        $this->csvFileValidation->validateDataFields($results->fetchAssoc());
+        if (!$this->csvFileValidation->isStopped) {
             $this->importToDatabase($results->fetchAssoc(), $isTest);
         }
     }
@@ -85,36 +86,59 @@ class CSVImportWorker
     {
         foreach ($results as $row) {
             if ($this->checkRequirements($row)) {
-                    $product = (new Product())
-                        ->setProductCode($row['Product Code'])
-                        ->setProductName($row['Product Name'])
-                        ->setProductDescription($row['Product Description'])
-                        ->setStock((int)$row['Stock'])
-                        ->setCost((int)$row['Cost in GBP'])
-                        ->setDiscontinued($row['Discontinued']);
+                $product = (new Product())
+                    ->setProductCode($row['Product Code'])
+                    ->setProductName($row['Product Name'])
+                    ->setProductDescription($row['Product Description'])
+                    ->setStock((int)$row['Stock'])
+                    ->setCost((int)$row['Cost in GBP'])
+                    ->setDiscontinued($row['Discontinued']);
 
-                    $this->em->persist($product);
-                    $this->products->append($product);
-                    if (!$isTest) {
-                        $this->em->flush();
-                    }
-
-                    $this->processed++;
+                $this->em->persist($product);
+                $this->products->append($product);
+                if (!$isTest) {
+                    $this->em->flush();
                 }
+
+                $this->processed++;
             }
+        }
+
+//        foreach ($this->csvFileValidation->errorMessage as $message) {
+//            var_dump($message);
+//        }
 
         $this->skipped = $this->total - $this->processed;
 
     }
 
-    /**
-     * @return String
-     */
-    //TODO: Will be unused after importProducts() refactoring
-    public function stopImportProducts()
-    {
-        return $this->csvFileValidation->errorMessage;
-    }
+//    public function isCorrectNumericField($field): String
+//    {
+//        if ($field == "") {
+//            return "Empty value\n";
+//        }
+//        elseif ((float)$field == 0 || (int)$field == 0) {
+//            return "String value instead number\n";
+//        }
+//        return "Valid\n";
+//    }
+//
+//    public function isCorrectStringField($field): String
+//    {
+//        if(preg_match('/^\d+$/', $field)) {
+//            return "Numeric value provided instead string\n";
+//        }
+//        return "Valid\n";
+//    }
+//
+//    public function isCorrectProductCodeField($field): String
+//    {
+//        if(!preg_match('/^[P]/', $field)) {
+//            return "String must began from 'P' character\n";
+//        }
+//        return "Valid\n";
+//    }
+
 
     /**
      * @param array $row

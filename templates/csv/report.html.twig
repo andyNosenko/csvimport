@@ -1,9 +1,18 @@
 {% extends "base.html.twig" %}
 {% block title %}Report{% endblock %}
 {% block body %}
+    {% for message in app.flashes('notice') %}
+        <div class="flash-notice">
+            {{ message }}
+        </div>
+    {% endfor %}
     <h1>Submitted!</h1>
     <br>
     <h1>Total items found: {{ total }}</h1>
+    <br>
+    {% for error in errors %}
+        <p>{{ error }}</p>
+    {% endfor %}
     <br>
     <h1>Items were skipped: {{ skipped }}</h1>
     <br>

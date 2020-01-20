@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Service\CSVFileValidation;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use Symfony\Component\Console\Command\Command;
@@ -31,20 +32,31 @@ class CsvImportCommand extends Command
     private $csvImportWorker;
 
     /**
+     * @var CSVFileValidation
+     */
+    private $csvFileValidator;
+
+    /**
      * @var CSVMailSender
      */
     private $csvMailSender;
 
     /**
      * @param CSVImportWorker $csvImportWorker
+     * @param CSVFileValidation $csvFileValidator
      * @param CSVMailSender $csvMailSender
      * @param String $targetDirectory
      */
-    public function __construct(CSVImportWorker $csvImportWorker, CSVMailSender $csvMailSender, String $targetDirectory)
-    {
+    public function __construct(
+        CSVImportWorker $csvImportWorker,
+        CSVFileValidation $csvFileValidator,
+        CSVMailSender $csvMailSender,
+        String $targetDirectory
+    ) {
         parent::__construct();
 
         $this->csvImportWorker = $csvImportWorker;
+        $this->csvFileValidator = $csvFileValidator;
         $this->csvMailSender = $csvMailSender;
         $this->targetDirectory = $targetDirectory;
     }
@@ -77,13 +89,14 @@ class CsvImportCommand extends Command
             'total' => $this->csvImportWorker->total,
             'skipped' => $this->csvImportWorker->skipped,
             'processed' => $this->csvImportWorker->processed,
-            'products' => $this->csvImportWorker->products
+            'products' => $this->csvImportWorker->products,
+            'errors' => $this->csvFileValidator->errorMessage,
         ], (bool)$test == false);
 
 
         $io->note("Found products: " . $this->csvImportWorker->total);
-        $io->warning($this->csvImportWorker->skipped . ' items were skiped');
-        $io->success($this->csvImportWorker->processed . ' items imported seccessfuly!');
+        $io->warning($this->csvImportWorker->skipped . ' items were skipped');
+        $io->success($this->csvImportWorker->processed . ' items imported successfully!');
 
         return 0;
     }
