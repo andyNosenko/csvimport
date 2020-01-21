@@ -8,6 +8,7 @@ use App\Form\CSVFileType;
 use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
+use SplFileObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,9 +56,9 @@ class ProductController extends AbstractController
                 $csvImportWorker->importProducts($destination . '/' . $fileName, $isTest);
 
                 $csvMailSender->sendEmail([
-                    'total' => $csvImportWorker->total,
-                    'skipped' => $csvImportWorker->skipped,
-                    'processed' => $csvImportWorker->processed,
+                    'total' => $csvImportWorker->totalCount,
+                    'skipped' => $csvImportWorker->skippedCount,
+                    'processed' => $csvImportWorker->processedCount,
                     'products' => $csvImportWorker->products,
                     'errors' => $csvFileValidation->getErrorMessages(),
                 ], $isTest);
@@ -68,9 +69,9 @@ class ProductController extends AbstractController
                 );
 
                 return $this->render("csv/report.html.twig", [
-                    'total' => $csvImportWorker->total,
-                    'skipped' => $csvImportWorker->skipped,
-                    'processed' => $csvImportWorker->processed,
+                    'total' => $csvImportWorker->totalCount,
+                    'skipped' => $csvImportWorker->skippedCount,
+                    'processed' => $csvImportWorker->processedCount,
                     'products' => $csvImportWorker->products,
                     'errors' => $csvFileValidation->getErrorMessages(),
                 ]);

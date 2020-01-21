@@ -27,17 +27,17 @@ class CSVImportWorker
     /**
      * @var int
      */
-    public $total;
+    public $totalCount;
 
     /**
      * @var int
      */
-    public $processed;
+    public $processedCount;
 
     /**
      * @var int
      */
-    public $skipped;
+    public $skippedCount;
 
     /**
      * @var \ArrayObject
@@ -67,17 +67,12 @@ class CSVImportWorker
     //TODO: Instead String path Reader object
     public function importProducts(String $path, Bool $isTest)
     {
-        $results = null;
+        $reader = $this->csvFileReader->read($path);
+        $results = $reader->fetchAssoc();
+        $this->totalCount = iterator_count($results);
 
-        if ($this->csvFileValidation->validate($this->csvFileReader->read($path))) {
-            $results = $this->csvFileReader->getReader();
-            $this->total = iterator_count($results->fetchAssoc());
-        }
-
-        $this->csvFileValidation->validateDataFields($results->fetchAssoc());
-
-        if (empty($this->csvFileValidation->getErrorMessages())) {
-            $this->importToDatabase($results->fetchAssoc(), $isTest);
+        if ($this->csvFileValidation->validate($results)) {
+            $this->importToDatabase($results, $isTest);
         }
     }
 
@@ -85,7 +80,7 @@ class CSVImportWorker
      * @param \Iterator $results
      * @param bool $isTest
      */
-    public function importToDatabase(\Iterator $results, Bool $isTest): void
+    private function importToDatabase(\Iterator $results, Bool $isTest): void
     {
         foreach ($results as $row) {
 
@@ -105,10 +100,10 @@ class CSVImportWorker
                     $this->em->flush();
                 }
 
-                $this->processed++;
+                $this->processedCount++;
             }
         }
-        $this->skipped = $this->total - $this->processed;
+        $this->skippedCount = $this->totalCount - $this->processedCount;
 
     }
 
@@ -116,7 +111,7 @@ class CSVImportWorker
      * @param array $row
      * @return bool
      */
-    public function checkRequirements(Array $row): bool
+    private function checkRequirements(Array $row): bool
     {
         return $row['Cost in GBP'] > 5 && $row['Cost in GBP'] <= 1000 && $row['Stock'] > 10;
     }

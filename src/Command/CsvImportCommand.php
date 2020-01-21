@@ -84,19 +84,21 @@ class CsvImportCommand extends Command
 
         $test = $input->getOption("test");
         $this->csvImportWorker->importProducts($this->targetDirectory . $file, (bool)$test == false);
-        //$this->csvMailSender->sendEmail($this->csvImportWorker, (bool)$test==false);
         $this->csvMailSender->sendEmail([
-            'total' => $this->csvImportWorker->total,
-            'skipped' => $this->csvImportWorker->skipped,
-            'processed' => $this->csvImportWorker->processed,
+            'total' => $this->csvImportWorker->totalCount,
+            'skipped' => $this->csvImportWorker->skippedCount,
+            'processed' => $this->csvImportWorker->processedCount,
             'products' => $this->csvImportWorker->products,
             'errors' => $this->csvFileValidator->getErrorMessages(),
         ], (bool)$test == false);
 
+        foreach ($this->csvFileValidator->getErrorMessages() as $message) {
+            var_dump($message);
+        }
 
-        $io->note("Found products: " . $this->csvImportWorker->total);
-        $io->warning($this->csvImportWorker->skipped . ' items were skipped');
-        $io->success($this->csvImportWorker->processed . ' items imported successfully!');
+        $io->note("Found products: " . $this->csvImportWorker->totalCount);
+        $io->warning($this->csvImportWorker->skippedCount . ' items were skipped');
+        $io->success($this->csvImportWorker->processedCount . ' items imported successfully!');
 
         return 0;
     }
