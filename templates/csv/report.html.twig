@@ -2,39 +2,44 @@
 {% block title %}Report{% endblock %}
 {% block body %}
     {% for message in app.flashes('notice') %}
-        <div class="flash-notice">
+        <div class="alert alert-notice">
             {{ message }}
         </div>
     {% endfor %}
-    <h1>Submitted!</h1>
-    <br>
     <h1>Total items found: {{ total }}</h1>
     <br>
-    {% for error in errors %}
-        <p>{{ error }}</p>
-    {% endfor %}
-    <br>
-    <h1>Items were skipped: {{ skipped }}</h1>
-    <br>
-    <h1>Items were processed: {{ processed }}</h1>
-    <table>
-        <tr>
-            <th>Product Code</th>
-            <th>Product Name</th>
-            <th>Product Description</th>
-            <th>Stock</th>
-            <th>Cost in GBP</th>
-            <th>Discontinued</th>
-        </tr>
-        {% for product in products %}
-            <tr>
-                <td>{{ product.productCode }}</td>
-                <td>{{ product.productName }}</td>
-                <td>{{ product.productDescription }}</td>
-                <td>{{ product.stock }}</td>
-                <td>{{ product.cost }}</td>
-                <td>{{ product.discontinued }}</td>
-            </tr>
+    {% if errors %}
+        <h1>Sorry, but your csv file is not valid(</h1>
+        <p>Please check file and upload again</p>
+        <br>
+        {% for error in errors %}
+            <p>{{ error }}</p>
         {% endfor %}
-    </table>
+        <br>
+    {% endif %}
+    {% if processed %}
+        <h1>Items were skipped: {{ skipped }}</h1>
+        <br>
+        <h1>Items were processed: {{ processed }}</h1>
+        <table>
+            <tr>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Product Description</th>
+                <th>Stock</th>
+                <th>Cost in GBP</th>
+                <th>Discontinued</th>
+            </tr>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.productCode }}</td>
+                    <td>{{ product.productName }}</td>
+                    <td>{{ product.productDescription }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>{{ product.cost }}</td>
+                    <td>{{ product.discontinued }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 {% endblock %}

@@ -74,43 +74,46 @@ class CSVFileValidation
 
     public function validateDataFields(\Iterator $data_fields): void
     {
-        foreach ($data_fields as $row) {
-            $this->isCorrectProductCodeField($row['Product Code']);
-            $this->isCorrectStringField($row['Product Name']);
-            $this->isCorrectStringField($row['Product Description']);
-            $this->isCorrectNumericField($row['Stock']);
-            $this->isCorrectNumericField($row['Cost in GBP']);
+        foreach ($data_fields as $key => $row) {
+            $this->isCorrectProductCodeField($row['Product Code'], $key, "Product Code");
+            $this->isCorrectStringField($row['Product Name'], $key, "Product Name");
+            $this->isCorrectStringField($row['Product Description'], $key, "Product Description");
+            $this->isCorrectNumericField($row['Stock'], $key, "Stock");
+            $this->isCorrectNumericField($row['Cost in GBP'], $key, "Cost in GBP");
         }
 
-//        foreach ($this->errorMessage as $message) {
-//            var_dump($message);
-//        }
+        foreach ($this->errorMessage as $message) {
+            var_dump($message);
+        }
     }
 
-    public function isCorrectNumericField($field): void
+    public function isCorrectNumericField($field, $key, $fieldName): void
     {
+        $key++;
         if ($field == "") {
-            array_push($this->errorMessage, $field." Empty value\n");
+            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: Empty value\n");
             $this->isStopped = true;
         }
         elseif ((float)$field == 0 || (int)$field == 0) {
-            array_push($this->errorMessage, $field." String value instead number\n");
+            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: String value instead number\n");
             $this->isStopped = true;
         }
     }
 
-    public function isCorrectStringField($field): void
+    public function isCorrectStringField($field, $key, $fieldName): void
     {
+        $key++;
         if(preg_match('/^\d+$/', $field)) {
-            array_push($this->errorMessage, $field." Numeric value provided instead string\n");
+            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: Numeric value provided instead string\n");
             $this->isStopped = true;
         }
     }
 
-    public function isCorrectProductCodeField($field): void
+    public function isCorrectProductCodeField($field, $key, $fieldName): void
     {
+        $key++;
         if(!preg_match('/^[P]/', $field)) {
-           array_push($this->errorMessage, $field." String must began from 'P' character\n");
+           array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: String must begin from 'P' character\n");
            $this->isStopped = true;
         }
     }
