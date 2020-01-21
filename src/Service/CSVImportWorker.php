@@ -20,7 +20,7 @@ class CSVImportWorker
     private $csvFileReader;
 
     /**
-     * @var CSVFileValidation
+     * @var CSVFileValidator
      */
     private $csvFileValidation;
 
@@ -47,12 +47,12 @@ class CSVImportWorker
     /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
-     * @param \App\Service\CSVFileValidation $csvFileValidation
+     * @param \App\Service\CSVFileValidator $csvFileValidation
      */
     public function __construct(
         EntityManagerInterface $em,
         CsvFileReader $csvFileReader,
-        CSVFileValidation $csvFileValidation
+        CSVFileValidator $csvFileValidation
     ) {
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
@@ -68,12 +68,15 @@ class CSVImportWorker
     public function importProducts(String $path, Bool $isTest)
     {
         $results = null;
+
         if ($this->csvFileValidation->validate($this->csvFileReader->read($path))) {
             $results = $this->csvFileReader->getReader();
             $this->total = iterator_count($results->fetchAssoc());
         }
+
         $this->csvFileValidation->validateDataFields($results->fetchAssoc());
-        if (!$this->csvFileValidation->isStopped) {
+
+        if (empty($this->csvFileValidation->getErrorMessages())) {
             $this->importToDatabase($results->fetchAssoc(), $isTest);
         }
     }
@@ -85,6 +88,7 @@ class CSVImportWorker
     public function importToDatabase(\Iterator $results, Bool $isTest): void
     {
         foreach ($results as $row) {
+
             if ($this->checkRequirements($row)) {
                 $product = (new Product())
                     ->setProductCode($row['Product Code'])
@@ -96,6 +100,7 @@ class CSVImportWorker
 
                 $this->em->persist($product);
                 $this->products->append($product);
+
                 if (!$isTest) {
                     $this->em->flush();
                 }
@@ -103,42 +108,9 @@ class CSVImportWorker
                 $this->processed++;
             }
         }
-
-//        foreach ($this->csvFileValidation->errorMessage as $message) {
-//            var_dump($message);
-//        }
-
         $this->skipped = $this->total - $this->processed;
 
     }
-
-//    public function isCorrectNumericField($field): String
-//    {
-//        if ($field == "") {
-//            return "Empty value\n";
-//        }
-//        elseif ((float)$field == 0 || (int)$field == 0) {
-//            return "String value instead number\n";
-//        }
-//        return "Valid\n";
-//    }
-//
-//    public function isCorrectStringField($field): String
-//    {
-//        if(preg_match('/^\d+$/', $field)) {
-//            return "Numeric value provided instead string\n";
-//        }
-//        return "Valid\n";
-//    }
-//
-//    public function isCorrectProductCodeField($field): String
-//    {
-//        if(!preg_match('/^[P]/', $field)) {
-//            return "String must began from 'P' character\n";
-//        }
-//        return "Valid\n";
-//    }
-
 
     /**
      * @param array $row

@@ -42,18 +42,19 @@ class CSVMailSender
     }
 
     /**
-     * @param array $attributes
+     * @param array $templateParameters
      * @param bool $isTest
      * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
-    public function sendEmail(Array $attributes, bool $isTest): void
+    public function sendEmail(Array $templateParameters, bool $isTest): void
     {
         $email = (new TemplatedEmail())
             ->from($this->senderEmail)
             ->to($this->recipientEmail)
             ->subject("Products import report")
             ->htmlTemplate("csv/report.html.twig")
-            ->context($attributes);
+            ->context($templateParameters);
+
         if (!$isTest) {
             $this->mailer->send($email);
         }

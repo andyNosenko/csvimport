@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\CSVFileValidation;
+use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use Symfony\Component\Console\Command\Command;
@@ -32,7 +32,7 @@ class CsvImportCommand extends Command
     private $csvImportWorker;
 
     /**
-     * @var CSVFileValidation
+     * @var CSVFileValidator
      */
     private $csvFileValidator;
 
@@ -43,13 +43,13 @@ class CsvImportCommand extends Command
 
     /**
      * @param CSVImportWorker $csvImportWorker
-     * @param CSVFileValidation $csvFileValidator
+     * @param CSVFileValidator $csvFileValidator
      * @param CSVMailSender $csvMailSender
      * @param String $targetDirectory
      */
     public function __construct(
         CSVImportWorker $csvImportWorker,
-        CSVFileValidation $csvFileValidator,
+        CSVFileValidator $csvFileValidator,
         CSVMailSender $csvMailSender,
         String $targetDirectory
     ) {
@@ -65,7 +65,7 @@ class CsvImportCommand extends Command
     {
         $this
             ->setDescription('Import CSV file into database')
-            ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...', "stock.csv")
+            ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...', "stock1.csv")
             ->addOption('test', null, InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
     }
 
@@ -90,7 +90,7 @@ class CsvImportCommand extends Command
             'skipped' => $this->csvImportWorker->skipped,
             'processed' => $this->csvImportWorker->processed,
             'products' => $this->csvImportWorker->products,
-            'errors' => $this->csvFileValidator->errorMessage,
+            'errors' => $this->csvFileValidator->getErrorMessages(),
         ], (bool)$test == false);
 
 

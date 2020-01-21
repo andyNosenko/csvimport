@@ -6,7 +6,7 @@ namespace App\Service;
 
 use League\Csv\Reader;
 
-class CSVFileValidation
+class CSVFileValidator
 {
     /**
      * @var CsvFileReader
@@ -16,12 +16,7 @@ class CSVFileValidation
     /**
      * @var array
      */
-    public $errorMessage = [];
-
-    /**
-     * @var bool
-     */
-    public $isStopped = false;
+    private $errorMessages = [];
 
     /**
      * @var array
@@ -34,6 +29,14 @@ class CSVFileValidation
         'Cost in GBP',
         'Discontinued'
     ];
+
+    /**
+     * @return array
+     */
+    public function getErrorMessages(): array
+    {
+        return $this->errorMessages;
+    }
 
     /**
      * @param \App\Service\CsvFileReader $csvFileReader
@@ -69,6 +72,7 @@ class CSVFileValidation
         if ($this->identical_fields($this->validFieldsRule, $csvFields)) {
             return true;
         }
+
         return false;
     }
 
@@ -82,40 +86,64 @@ class CSVFileValidation
             $this->isCorrectNumericField($row['Cost in GBP'], $key, "Cost in GBP");
         }
 
-        foreach ($this->errorMessage as $message) {
+        foreach ($this->errorMessages as $message) {
             var_dump($message);
         }
     }
 
     public function isCorrectNumericField($field, $key, $fieldName): void
     {
-        $key++;
         if ($field == "") {
-            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: Empty value\n");
-            $this->isStopped = true;
-        }
-        elseif ((float)$field == 0 || (int)$field == 0) {
-            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: String value instead number\n");
-            $this->isStopped = true;
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
+        } elseif (!is_numeric($field)) {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String value instead number"));
         }
     }
 
     public function isCorrectStringField($field, $key, $fieldName): void
     {
-        $key++;
-        if(preg_match('/^\d+$/', $field)) {
-            array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: Numeric value provided instead string\n");
-            $this->isStopped = true;
+        if ($field == "") {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
+        } elseif (!$this->isCorrectStringLength($field)) {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String length greater then 255"));
+        } elseif (preg_match('/^\d+$/', $field)) {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Numeric value provided instead string"));
         }
     }
 
     public function isCorrectProductCodeField($field, $key, $fieldName): void
     {
-        $key++;
-        if(!preg_match('/^[P]/', $field)) {
-           array_push($this->errorMessage, "Line number: ".$key." Column: ".$fieldName." Value in column: ".$field." Error: String must begin from 'P' character\n");
-           $this->isStopped = true;
+        if ($field == "") {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
+        } elseif (!$this->isCorrectStringLength($field)) {
+            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String length greater then 255"));
+        } elseif (!preg_match('/^P\d+/', $field)) {
+           array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String must begin from 'P' character"));
         }
     }
+
+    /**
+     * @param String $field
+     * @return bool
+     */
+    private function isCorrectStringLength(String $field): bool
+    {
+        return strlen($field) <= 255;
+    }
+
+    /**
+     * @param $field
+     * @param Int $key
+     * @param String $fieldName
+     * @param String $error
+     * @return String
+     */
+    private function buildErrorMessage($field, Int $key, String $fieldName, String $error): String
+    {
+        $key++;
+        return sprintf("Line number: %s | Column: %s | Value in column: %s | Error: %s\n", $key, $fieldName, $field, $error);
+    }
+
+
 }
 
