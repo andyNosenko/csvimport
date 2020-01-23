@@ -8,6 +8,7 @@ use App\Form\CSVFileType;
 use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
+use App\Service\DBProductExporter;
 use SplFileObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +32,8 @@ class ProductController extends AbstractController
         CSVImportWorker $csvImportWorker,
         CSVFileValidator $csvFileValidation,
         CSVMailSender $csvMailSender
-    ) {
+    )
+    {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
 
@@ -68,6 +70,12 @@ class ProductController extends AbstractController
                     'Your file was successfully uploaded!'
                 );
 
+                if ($csvFileValidation->getErrorMessages()) {
+                    return $this->render("csv/errors.html.twig", [
+                        'errors' => $csvFileValidation->getErrorMessages(),
+                    ]);
+                }
+
                 return $this->render("csv/report.html.twig", [
                     'total' => $csvImportWorker->totalCount,
                     'skipped' => $csvImportWorker->skippedCount,
@@ -81,6 +89,20 @@ class ProductController extends AbstractController
         }
         return $this->render('csv/index.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/view", name="ProductsView")
+     * @param Request $request
+     * @param DBProductExporter $dbProductExporter
+     * @return Response
+     */
+    public function view(Request $request, DBProductExporter $dbProductExporter)
+    {
+        $products = $dbProductExporter->ReturnProducts($request);
+        return $this->render('csv/view.html.twig', [
+            'products' => $products,
         ]);
     }
 }
