@@ -9,7 +9,6 @@ use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use App\Service\DBProductExporter;
-use SplFileObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,52 +39,35 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
-            $extension = $file->guessExtension();
 
-            if ($extension == 'csv' || $extension == 'txt') {
-                $destination = $this->getParameter('kernel.project_dir') . '/src/Data';
+            $file->move($file->getPath(), $file->getClientOriginalName());
+            $csvImportWorker->importProducts($file->getPath()."/".$file->getClientOriginalName(), $isTest);
+            $csvMailSender->sendEmail([
+                'total' => $csvImportWorker->totalCount,
+                'skipped' => $csvImportWorker->skippedCount,
+                'processed' => $csvImportWorker->processedCount,
+                'products' => $csvImportWorker->products,
+                'errors' => $csvFileValidation->getErrorMessages(),
+            ], $isTest);
 
-                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $this->addFlash(
+                'notice',
+                'Your file was successfully uploaded!'
+            );
 
-                if ($extension == "txt") {
-                    $fileName = $originalFilename . '.' . 'csv';
-                } else {
-                    $fileName = $originalFilename . '.' . $extension;
-                }
-
-                $file->move($destination, $fileName);
-
-                $csvImportWorker->importProducts($destination . '/' . $fileName, $isTest);
-
-                $csvMailSender->sendEmail([
-                    'total' => $csvImportWorker->totalCount,
-                    'skipped' => $csvImportWorker->skippedCount,
-                    'processed' => $csvImportWorker->processedCount,
-                    'products' => $csvImportWorker->products,
-                    'errors' => $csvFileValidation->getErrorMessages(),
-                ], $isTest);
-
-                $this->addFlash(
-                    'notice',
-                    'Your file was successfully uploaded!'
-                );
-
-                if ($csvFileValidation->getErrorMessages()) {
-                    return $this->render("csv/errors.html.twig", [
-                        'errors' => $csvFileValidation->getErrorMessages(),
-                    ]);
-                }
-
-                return $this->render("csv/report.html.twig", [
-                    'total' => $csvImportWorker->totalCount,
-                    'skipped' => $csvImportWorker->skippedCount,
-                    'processed' => $csvImportWorker->processedCount,
-                    'products' => $csvImportWorker->products,
+            if ($csvFileValidation->getErrorMessages()) {
+                return $this->render("csv/errors.html.twig", [
                     'errors' => $csvFileValidation->getErrorMessages(),
                 ]);
-            } else {
-                return $this->render("csv/fileExtensionError.html.twig");
             }
+
+            return $this->render("csv/report.html.twig", [
+                'total' => $csvImportWorker->totalCount,
+                'skipped' => $csvImportWorker->skippedCount,
+                'processed' => $csvImportWorker->processedCount,
+                'products' => $csvImportWorker->products,
+                'errors' => $csvFileValidation->getErrorMessages(),
+            ]);
         }
         return $this->render('csv/index.html.twig', [
             'form' => $form->createView(),
