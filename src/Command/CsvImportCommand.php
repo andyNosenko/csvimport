@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use Symfony\Component\Console\Command\Command;
@@ -32,31 +31,23 @@ class CsvImportCommand extends Command
     private $csvImportWorker;
 
     /**
-     * @var CSVFileValidator
-     */
-    private $csvFileValidator;
-
-    /**
      * @var CSVMailSender
      */
     private $csvMailSender;
 
     /**
      * @param CSVImportWorker $csvImportWorker
-     * @param CSVFileValidator $csvFileValidator
      * @param CSVMailSender $csvMailSender
      * @param String $targetDirectory
      */
     public function __construct(
         CSVImportWorker $csvImportWorker,
-        CSVFileValidator $csvFileValidator,
         CSVMailSender $csvMailSender,
         String $targetDirectory
     ) {
         parent::__construct();
 
         $this->csvImportWorker = $csvImportWorker;
-        $this->csvFileValidator = $csvFileValidator;
         $this->csvMailSender = $csvMailSender;
         $this->targetDirectory = $targetDirectory;
     }
@@ -65,8 +56,10 @@ class CsvImportCommand extends Command
     {
         $this
             ->setDescription('Import CSV file into database')
-            ->addArgument('file_name', InputArgument::OPTIONAL, 'Choose your file with .csv extension...', "stock.csv")
-            ->addOption('test', null, InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
+            ->addArgument('file_name', InputArgument::OPTIONAL,
+                'Choose your file with .csv extension...', "stock.csv")
+            ->addOption('test', null,
+                InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
     }
 
     /**
@@ -89,12 +82,9 @@ class CsvImportCommand extends Command
             'skipped' => $this->csvImportWorker->skippedCount,
             'processed' => $this->csvImportWorker->processedCount,
             'products' => $this->csvImportWorker->products,
-            'errors' => $this->csvFileValidator->getErrorMessages(),
-        ], (bool)$test == false);
-
-        foreach ($this->csvFileValidator->getErrorMessages() as $message) {
-            var_dump($message);
-        }
+            'errors' => $this->csvImportWorker->getErrors(),
+        ],
+            (bool)$test == false);
 
         $io->note("Found products: " . $this->csvImportWorker->totalCount);
         $io->warning($this->csvImportWorker->skippedCount . ' items were skipped');

@@ -22,7 +22,7 @@ class CSVImportWorker
     /**
      * @var CSVFileValidator
      */
-    private $csvFileValidation;
+    private $csvFileValidator;
 
     /**
      * @var int
@@ -47,16 +47,16 @@ class CSVImportWorker
     /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
-     * @param \App\Service\CSVFileValidator $csvFileValidation
+     * @param \App\Service\CSVFileValidator $CSVFileValidator
      */
     public function __construct(
         EntityManagerInterface $em,
         CsvFileReader $csvFileReader,
-        CSVFileValidator $csvFileValidation
+        CSVFileValidator $CSVFileValidator
     ) {
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
-        $this->csvFileValidation = $csvFileValidation;
+        $this->csvFileValidator = $CSVFileValidator;
         $this->products = new \ArrayObject();
     }
 
@@ -69,9 +69,9 @@ class CSVImportWorker
     {
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
-        $this->totalCount = iterator_count($results);
 
-        if ($this->csvFileValidation->validate($results)) {
+        if ($this->csvFileValidator->validate($results)) {
+            $this->totalCount = iterator_count($results);
             $this->importToDatabase($results, $isTest);
         }
     }
@@ -114,6 +114,14 @@ class CSVImportWorker
     private function checkRequirements(Array $row): bool
     {
         return $row['Cost in GBP'] > 5 && $row['Cost in GBP'] <= 1000 && $row['Stock'] > 10;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors()
+    {
+        return $this->csvFileValidator->getErrorMessages();
     }
 }
 

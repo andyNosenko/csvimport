@@ -5,28 +5,26 @@
 {% block body %}
     <div class="container">
         <h2>{% trans %}List of Products{% endtrans %}</h2>
-        {% for product in products %}
-                    <table>
-                        <tr>
-                            <th>Product Code</th>
-                            <th>Product Name</th>
-                            <th>Product Description</th>
-                            <th>Stock</th>
-                            <th>Cost in GBP</th>
-                            <th>Discontinued</th>
-                        </tr>
-                        {% for product in products %}
-                            <tr>
-                                <td>{{ product.productCode }}</td>
-                                <td>{{ product.productName }}</td>
-                                <td>{{ product.productDescription }}</td>
-                                <td>{{ product.stock }}</td>
-                                <td>{{ product.cost }}</td>
-                                <td>{{ product.discontinued }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-        {% endfor %}
+        <table>
+            <tr>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Product Description</th>
+                <th>Stock</th>
+                <th>Cost in GBP</th>
+                <th>Discontinued</th>
+            </tr>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.productCode }}</td>
+                    <td>{{ product.productName }}</td>
+                    <td>{{ product.productDescription }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>{{ product.cost }}</td>
+                    <td>{{ product.discontinued }}</td>
+                </tr>
+            {% endfor %}
+        </table>
         <div class="navigation">
             {{ knp_pagination_render(products) }}
         </div>

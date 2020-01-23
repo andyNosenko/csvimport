@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\CSVFileType;
-use App\Service\CSVFileValidator;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use App\Service\DBProductExporter;
@@ -21,7 +20,6 @@ class ProductController extends AbstractController
      * @Route("/importfile", name="importfile")
      * @param Request $request
      * @param CSVImportWorker $csvImportWorker
-     * @param CSVFileValidator $csvFileValidation
      * @param CSVMailSender $csvMailSender
      * @return Response
      * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
@@ -29,7 +27,6 @@ class ProductController extends AbstractController
     public function csvImportAction(
         Request $request,
         CSVImportWorker $csvImportWorker,
-        CSVFileValidator $csvFileValidation,
         CSVMailSender $csvMailSender
     )
     {
@@ -37,17 +34,14 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
-
-            $file->move($file->getPath(), $file->getClientOriginalName());
-            $csvImportWorker->importProducts($file->getPath()."/".$file->getClientOriginalName(), $isTest);
+            $csvImportWorker->importProducts($form["file"]->getData()->getPath()."/".$form["file"]->getData()->getClientOriginalName(), $isTest);
             $csvMailSender->sendEmail([
                 'total' => $csvImportWorker->totalCount,
                 'skipped' => $csvImportWorker->skippedCount,
                 'processed' => $csvImportWorker->processedCount,
                 'products' => $csvImportWorker->products,
-                'errors' => $csvFileValidation->getErrorMessages(),
+                'errors' => $csvImportWorker->getErrors(),
             ], $isTest);
 
             $this->addFlash(
@@ -55,9 +49,9 @@ class ProductController extends AbstractController
                 'Your file was successfully uploaded!'
             );
 
-            if ($csvFileValidation->getErrorMessages()) {
+            if ($csvImportWorker->getErrors()) {
                 return $this->render("csv/errors.html.twig", [
-                    'errors' => $csvFileValidation->getErrorMessages(),
+                    'errors' => $csvImportWorker->getErrors(),
                 ]);
             }
 
@@ -66,7 +60,7 @@ class ProductController extends AbstractController
                 'skipped' => $csvImportWorker->skippedCount,
                 'processed' => $csvImportWorker->processedCount,
                 'products' => $csvImportWorker->products,
-                'errors' => $csvFileValidation->getErrorMessages(),
+                'errors' => $csvImportWorker->getErrors(),
             ]);
         }
         return $this->render('csv/index.html.twig', [

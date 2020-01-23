@@ -38,71 +38,80 @@ class CSVFileValidator
     }
 
     /**
-     * @param $field
-     * @param Int $key
+     * @param $value
+     * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectNumericField($field, Int $key, String $fieldName): void
+    private function isCorrectNumericField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($field == "") {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
-        } elseif (!is_numeric($field)) {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String value instead number"));
+        if ($value == "") {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+        } elseif (!is_numeric($value)) {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String value instead number"));
         }
     }
 
     /**
-     * @param $field
-     * @param Int $key
+     * @param $value
+     * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectStringField($field, Int $key, String $fieldName): void
+    private function isCorrectStringField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($field == "") {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
-        } elseif (!$this->isCorrectStringLength($field)) {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String length greater then 255"));
-        } elseif (preg_match('/^\d+$/', $field)) {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Numeric value provided instead string"));
+        if ($value == "") {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+        } elseif (!$this->isCorrectStringLength($value)) {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String length greater then 255"));
+        } elseif (preg_match('/^\d+$/', $value)) {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Numeric value provided instead string"));
         }
     }
 
     /**
-     * @param $field
-     * @param Int $key
+     * @param $value
+     * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectProductCodeField($field, Int $key, String $fieldName): void
+    private function isCorrectProductCodeField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($field == "") {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "Empty value"));
-        } elseif (!$this->isCorrectStringLength($field)) {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String length greater then 255"));
-        } elseif (!preg_match('/^P\d+/', $field)) {
-            array_push($this->errorMessages, $this->buildErrorMessage($field, $key, $fieldName, "String must begin from 'P' character"));
+        if ($value == "") {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+        } elseif (!$this->isCorrectStringLength($value)) {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String length greater then 255"));
+        } elseif (!preg_match('/^P\d+/', $value)) {
+            array_push($this->errorMessages,
+                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String must begin from 'P' character"));
         }
     }
 
     /**
-     * @param String $field
+     * @param String $value
      * @return bool
      */
-    private function isCorrectStringLength(String $field): bool
+    private function isCorrectStringLength(String $value): bool
     {
-        return strlen($field) <= 255;
+        return strlen($value) <= 255;
     }
 
     /**
-     * @param $field
-     * @param Int $key
+     * @param $value
+     * @param Int $rowNumber
      * @param String $fieldName
      * @param String $error
      * @return String
      */
-    private function buildErrorMessage($field, Int $key, String $fieldName, String $error): String
+    private function buildErrorMessage($value, Int $rowNumber, String $fieldName, String $error): String
     {
-        $key++;
-        return sprintf("Line number: %s | Column: %s | Value in column: %s | Error: %s\n", $key, $fieldName, $field, $error);
+        $rowNumber++;
+        return sprintf("Line number: %s | Column: %s | Value in column: %s | Error: %s\n",
+            $rowNumber, $fieldName, $value, $error);
     }
 }
 
