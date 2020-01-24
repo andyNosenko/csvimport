@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\Pagination\PaginationInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 class DBProductExporter
 {
@@ -16,19 +17,18 @@ class DBProductExporter
     protected $em;
 
     /**
-     * @var ContainerInterface
+     * @var PaginatorInterface
      */
-    protected $container;
+    protected  $paginator;
 
     /**
      * @param EntityManagerInterface $entityManager
-     * @param ContainerInterface $container
+     * @param PaginatorInterface $paginator
      */
-    public function __construct(EntityManagerInterface $entityManager,
-                                ContainerInterface $container)
+    public function __construct(EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
         $this->em = $entityManager;
-        $this->container = $container;
+        $this->paginator = $paginator;
     }
 
     /**
@@ -37,28 +37,10 @@ class DBProductExporter
      */
     public function ReturnProducts($request)
     {
-        $em = $this->em;
-        $container = $this->container;
-        $query = $em->createQuery(
-            '
-                SELECT
-                        t.id,
-                        t.productCode,
-                        t.productName,
-                        t.productDescription,
-                        t.stock,
-                        t.cost,
-                        t.discontinued
-                FROM
-                    App\Entity\Product t
-            '
-        );
-        $paginator = $container->get('knp_paginator');
-        $result = $paginator->paginate(
-            $query,
+       return $this->paginator->paginate(
+            $em = $this->em->getRepository(Product::class)->findAll(),
             $request->query->getInt('page', 1),
             $request->query->getInt('limit', 10)
         );
-        return ($result);
     }
 }
