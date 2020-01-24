@@ -31,6 +31,7 @@ class CSVFileValidator
             $this->validateStringField($row['Product Description'], $key, "Product Description");
             $this->validateNumericField($row['Stock'], $key, "Stock");
             $this->validateNumericField($row['Cost in GBP'], $key, "Cost in GBP");
+            $this->validateCategoryField($row['Category'], $key, 'Category');
         }
 
         return empty($this->errorMessages);
@@ -43,16 +44,15 @@ class CSVFileValidator
      */
     private function validateNumericField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($value == "") {
+
+        if ($this->isEmptyValue($value)) {
             array_push(
                 $this->errorMessages,
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
                     $fieldName,
-                    "Empty value"
-                )
-            );
+                    "Empty value"));
         } elseif (!is_numeric($value)) {
             array_push(
                 $this->errorMessages,
@@ -73,8 +73,9 @@ class CSVFileValidator
      */
     private function validateStringField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($value == "") {
-            array_push($this->errorMessages,
+        if ($this->isEmptyValue($value)) {
+            array_push(
+                $this->errorMessages,
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -83,7 +84,8 @@ class CSVFileValidator
                 )
             );
         } elseif (!$this->isCorrectStringLength($value)) {
-            array_push($this->errorMessages,
+            array_push(
+                $this->errorMessages,
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -110,8 +112,9 @@ class CSVFileValidator
      */
     private function validateProductCodeField($value, Int $rowNumber, String $fieldName): void
     {
-        if ($value == "") {
-            array_push($this->errorMessages,
+        if ($this->isEmptyValue($value)) {
+            array_push(
+                $this->errorMessages,
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -120,7 +123,8 @@ class CSVFileValidator
                 )
             );
         } elseif (!$this->isCorrectStringLength($value)) {
-            array_push($this->errorMessages,
+            array_push(
+                $this->errorMessages,
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -129,9 +133,36 @@ class CSVFileValidator
                 )
             );
         } elseif (!preg_match('/^P\d+/', $value)) {
-            array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String must begin from 'P' character"));
+            array_push(
+                $this->errorMessages,
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "String must begin from 'P' character"
+                )
+            );
         }
+    }
+
+    private function validateCategoryField($value, Int $rowNumber, String $fieldName): void
+    {
+        if ($this->isEmptyValue($value)) {
+            array_push(
+                $this->errorMessages,
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "Empty value"
+                )
+            );
+        }
+    }
+
+    private function isEmptyValue($value): bool
+    {
+        return $value == "";
     }
 
     /**

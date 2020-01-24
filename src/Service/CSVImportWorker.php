@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Category;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -84,13 +85,27 @@ class CSVImportWorker
     {
         foreach ($results as $row) {
             if ($this->checkRequirements($row)) {
+
+                $categoryExist = $this->em->getRepository(Category::class)->findOneBy([
+                    "name" => $row['Category']
+                ]);
+
+                if(!$categoryExist) {
+                    $category = (new Category())
+                        ->setName($row['Category']);
+                    $this->em->persist($category);
+                } else {
+                    $category = $categoryExist;
+                }
+
                 $product = (new Product())
                     ->setProductCode($row['Product Code'])
                     ->setProductName($row['Product Name'])
                     ->setProductDescription($row['Product Description'])
                     ->setStock((int)$row['Stock'])
                     ->setCost((int)$row['Cost in GBP'])
-                    ->setDiscontinued($row['Discontinued']);
+                    ->setDiscontinued($row['Discontinued'])
+                    ->setCategory($category);
 
                 $this->em->persist($product);
                 $this->products->append($product);
