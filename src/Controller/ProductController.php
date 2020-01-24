@@ -40,6 +40,7 @@ class ProductController extends AbstractController
                 $file->getPath(),
                 $file->getFilename()
             ), $isTest);
+<<<<<<< HEAD
             $csvMailSender->sendEmail(
                 [
                     'total' => $csvImportWorker->totalCount,
@@ -50,6 +51,15 @@ class ProductController extends AbstractController
                 ],
                 $isTest
             );
+=======
+            $csvMailSender->sendEmail([
+                'total' => $csvImportWorker->totalCount,
+                'skipped' => $csvImportWorker->skippedCount,
+                'processed' => $csvImportWorker->processedCount,
+                'products' => $csvImportWorker->products,
+                'errors' => $csvImportWorker->getErrors(),
+            ], $isTest);
+>>>>>>> Git flow
 
             $this->addFlash(
                 'notice',

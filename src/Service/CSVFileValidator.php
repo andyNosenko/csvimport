@@ -52,7 +52,13 @@ class CSVFileValidator
                     $value,
                     $rowNumber,
                     $fieldName,
+<<<<<<< HEAD
                     "Empty value"));
+=======
+                    "Empty value"
+                )
+            );
+>>>>>>> Git flow
         } elseif (!is_numeric($value)) {
             array_push(
                 $this->errorMessages,
@@ -74,8 +80,12 @@ class CSVFileValidator
     private function validateStringField($value, Int $rowNumber, String $fieldName): void
     {
         if ($this->isEmptyValue($value)) {
+<<<<<<< HEAD
             array_push(
                 $this->errorMessages,
+=======
+            array_push($this->errorMessages,
+>>>>>>> Git flow
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -84,8 +94,12 @@ class CSVFileValidator
                 )
             );
         } elseif (!$this->isCorrectStringLength($value)) {
+<<<<<<< HEAD
             array_push(
                 $this->errorMessages,
+=======
+            array_push($this->errorMessages,
+>>>>>>> Git flow
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -113,8 +127,12 @@ class CSVFileValidator
     private function validateProductCodeField($value, Int $rowNumber, String $fieldName): void
     {
         if ($this->isEmptyValue($value)) {
+<<<<<<< HEAD
             array_push(
                 $this->errorMessages,
+=======
+            array_push($this->errorMessages,
+>>>>>>> Git flow
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,
@@ -123,8 +141,12 @@ class CSVFileValidator
                 )
             );
         } elseif (!$this->isCorrectStringLength($value)) {
+<<<<<<< HEAD
             array_push(
                 $this->errorMessages,
+=======
+            array_push($this->errorMessages,
+>>>>>>> Git flow
                 $this->buildErrorMessage(
                     $value,
                     $rowNumber,

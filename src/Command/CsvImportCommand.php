@@ -76,7 +76,11 @@ class CsvImportCommand extends Command
         $file = $input->getArgument("file_name");
 
         $test = $input->getOption("test");
+<<<<<<< HEAD
         $this->csvImportWorker->importProducts($this->targetDirectory . $file, (bool) $test);
+=======
+        $this->csvImportWorker->importProducts($this->targetDirectory . $file, (bool) $test == false);
+>>>>>>> Git flow
         $this->csvMailSender->sendEmail(
             [
                 'total' => $this->csvImportWorker->totalCount,
@@ -84,8 +88,12 @@ class CsvImportCommand extends Command
                 'processed' => $this->csvImportWorker->processedCount,
                 'products' => $this->csvImportWorker->products,
                 'errors' => $this->csvImportWorker->getErrors(),
+<<<<<<< HEAD
             ],
             (bool) !$test
+=======
+            ], (bool) $test == false
+>>>>>>> Git flow
         );
 
         $io->note("Found products: " . $this->csvImportWorker->totalCount);
