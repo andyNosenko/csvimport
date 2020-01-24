@@ -34,8 +34,10 @@ class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
-            $csvImportWorker->importProducts($form["file"]->getData()->getPath()."/".$form["file"]->getData()->getClientOriginalName(), $isTest);
+            $file->move($file->getPath(), $file->getFilename() . ".csv");
+            $csvImportWorker->importProducts($file->getPath() . "/" . $file->getFilename() . ".csv", $isTest);
             $csvMailSender->sendEmail([
                 'total' => $csvImportWorker->totalCount,
                 'skipped' => $csvImportWorker->skippedCount,

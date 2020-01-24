@@ -57,7 +57,7 @@ class CsvImportCommand extends Command
         $this
             ->setDescription('Import CSV file into database')
             ->addArgument('file_name', InputArgument::OPTIONAL,
-                'Choose your file with .csv extension...', "stock.csv")
+                'Choose your file with .csv extension...', "stock1.csv")
             ->addOption('test', null,
                 InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
     }
