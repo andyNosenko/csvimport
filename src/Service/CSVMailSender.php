@@ -34,8 +34,7 @@ class CSVMailSender
         String $senderEmail,
         String $recipientEmail,
         MailerInterface $mailer
-    )
-    {
+    ) {
         $this->senderEmail = $senderEmail;
         $this->recipientEmail = $recipientEmail;
         $this->mailer = $mailer;

@@ -83,7 +83,6 @@ class CSVImportWorker
     private function importToDatabase(\Iterator $results, Bool $isTest): void
     {
         foreach ($results as $row) {
-
             if ($this->checkRequirements($row)) {
                 $product = (new Product())
                     ->setProductCode($row['Product Code'])

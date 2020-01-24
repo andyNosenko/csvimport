@@ -28,8 +28,7 @@ class ProductController extends AbstractController
         Request $request,
         CSVImportWorker $csvImportWorker,
         CSVMailSender $csvMailSender
-    )
-    {
+    ) {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
 
@@ -37,7 +36,10 @@ class ProductController extends AbstractController
             $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
             $file->move($file->getPath(), $file->getFilename() . ".csv");
-            $csvImportWorker->importProducts($file->getPath() . "/" . $file->getFilename() . ".csv", $isTest);
+            $csvImportWorker->importProducts(sprintf("%s/%s.csv",
+                $file->getPath(),
+                $file->getFilename()
+            ), $isTest);
             $csvMailSender->sendEmail([
                 'total' => $csvImportWorker->totalCount,
                 'skipped' => $csvImportWorker->skippedCount,

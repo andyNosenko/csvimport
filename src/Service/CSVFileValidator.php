@@ -25,13 +25,12 @@ class CSVFileValidator
      */
     public function validate(\Iterator $data_fields): bool
     {
-
         foreach ($data_fields as $key => $row) {
-            $this->isCorrectProductCodeField($row['Product Code'], $key, "Product Code");
-            $this->isCorrectStringField($row['Product Name'], $key, "Product Name");
-            $this->isCorrectStringField($row['Product Description'], $key, "Product Description");
-            $this->isCorrectNumericField($row['Stock'], $key, "Stock");
-            $this->isCorrectNumericField($row['Cost in GBP'], $key, "Cost in GBP");
+            $this->validateProductCodeField($row['Product Code'], $key, "Product Code");
+            $this->validateStringField($row['Product Name'], $key, "Product Name");
+            $this->validateStringField($row['Product Description'], $key, "Product Description");
+            $this->validateNumericField($row['Stock'], $key, "Stock");
+            $this->validateNumericField($row['Cost in GBP'], $key, "Cost in GBP");
         }
 
         return empty($this->errorMessages);
@@ -42,14 +41,28 @@ class CSVFileValidator
      * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectNumericField($value, Int $rowNumber, String $fieldName): void
+    private function validateNumericField($value, Int $rowNumber, String $fieldName): void
     {
         if ($value == "") {
-            array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+            array_push(
+                $this->errorMessages,
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "Empty value"
+                )
+            );
         } elseif (!is_numeric($value)) {
-            array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String value instead number"));
+            array_push(
+                $this->errorMessages,
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "String value instead number"
+                )
+            );
         }
     }
 
@@ -58,17 +71,35 @@ class CSVFileValidator
      * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectStringField($value, Int $rowNumber, String $fieldName): void
+    private function validateStringField($value, Int $rowNumber, String $fieldName): void
     {
         if ($value == "") {
             array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "Empty value"
+                )
+            );
         } elseif (!$this->isCorrectStringLength($value)) {
             array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String length greater then 255"));
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "String length greater then 255"
+                )
+            );
         } elseif (preg_match('/^\d+$/', $value)) {
             array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Numeric value provided instead string"));
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "Numeric value provided instead string"
+                )
+            );
         }
     }
 
@@ -77,14 +108,26 @@ class CSVFileValidator
      * @param Int $rowNumber
      * @param String $fieldName
      */
-    private function isCorrectProductCodeField($value, Int $rowNumber, String $fieldName): void
+    private function validateProductCodeField($value, Int $rowNumber, String $fieldName): void
     {
         if ($value == "") {
             array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "Empty value"));
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "Empty value"
+                )
+            );
         } elseif (!$this->isCorrectStringLength($value)) {
             array_push($this->errorMessages,
-                $this->buildErrorMessage($value, $rowNumber, $fieldName, "String length greater then 255"));
+                $this->buildErrorMessage(
+                    $value,
+                    $rowNumber,
+                    $fieldName,
+                    "String length greater then 255"
+                )
+            );
         } elseif (!preg_match('/^P\d+/', $value)) {
             array_push($this->errorMessages,
                 $this->buildErrorMessage($value, $rowNumber, $fieldName, "String must begin from 'P' character"));
