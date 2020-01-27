@@ -40,13 +40,16 @@ class ProductController extends AbstractController
                 $file->getPath(),
                 $file->getFilename()
             ), $isTest);
-            $csvMailSender->sendEmail([
-                'total' => $csvImportWorker->totalCount,
-                'skipped' => $csvImportWorker->skippedCount,
-                'processed' => $csvImportWorker->processedCount,
-                'products' => $csvImportWorker->products,
-                'errors' => $csvImportWorker->getErrors(),
-            ], $isTest);
+            $csvMailSender->sendEmail(
+                [
+                    'total' => $csvImportWorker->totalCount,
+                    'skipped' => $csvImportWorker->skippedCount,
+                    'processed' => $csvImportWorker->processedCount,
+                    'products' => $csvImportWorker->products,
+                    'errors' => $csvImportWorker->getErrors(),
+                ],
+                $isTest
+            );
 
             $this->addFlash(
                 'notice',
