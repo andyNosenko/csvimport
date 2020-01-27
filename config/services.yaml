@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
 
+imports:
+    - { resource: parameters.yaml }
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -25,3 +28,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Command\CsvImportCommand:
+        arguments:
+            $targetDirectory: '%kernel.project_dir%/src/Data/'
+
+    App\Service\CSVMailSender:
+        arguments:
+            $senderEmail: '%adminBox%'
+            $recipientEmail: '%recipientBox%'

@@ -1,82 +1,98 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
-use App\Entity\Product;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CSVImportWorker;
+use App\Service\CSVMailSender;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use League\Csv\Reader;
 
 class CsvImportCommand extends Command
 {
+    /**
+     * @var String
+     */
+    private $targetDirectory;
 
-  /**
-    * @var EntityManagerInterface
-    */
-   private $em;
-
+    /**
+     * @var string
+     */
     protected static $defaultName = 'csv:import';
 
     /**
-      * CsvImportCommand constructor.
-      *
-      * @param EntityManagerInterface $em
-      *
-      * @throws \Symfony\Component\Console\Exception\LogicException
-      */
-     public function __construct(EntityManagerInterface $em)
-     {
-         parent::__construct();
+     * @var CSVImportWorker
+     */
+    private $csvImportWorker;
 
-         $this->em = $em;
-     }
+    /**
+     * @var CSVMailSender
+     */
+    private $csvMailSender;
+
+    /**
+     * @param CSVImportWorker $csvImportWorker
+     * @param CSVMailSender $csvMailSender
+     * @param String $targetDirectory
+     */
+    public function __construct(
+        CSVImportWorker $csvImportWorker,
+        CSVMailSender $csvMailSender,
+        String $targetDirectory
+    ) {
+        parent::__construct();
+
+        $this->csvImportWorker = $csvImportWorker;
+        $this->csvMailSender = $csvMailSender;
+        $this->targetDirectory = $targetDirectory;
+    }
 
     protected function configure()
     {
         $this
             ->setDescription('Import CSV file into database')
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+            ->addArgument('file_name', InputArgument::OPTIONAL,
+                'Choose your file with .csv extension...', "stock1.csv")
+            ->addOption('test', null,
+                InputOption::VALUE_OPTIONAL, 'Test execution without database insertion', true);
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Attempting import of Products...');
 
-        $reader = Reader::createFromPath('%kernel.root_dir%/../src/Data/stock.csv');
+        $file = $input->getArgument("file_name");
 
-        $results = $reader->fetchAssoc();
-        $total = iterator_count($results);
-        $io->note("Found products: " .$total);
-        $processed = 0;
-        foreach ($results as $row) {
-          if ($row['Cost in GBP'] > 5 && $row['Stock'] > 10) {
-            if ($row['Cost in GBP'] <= 1000) {
-              $product = (new Product())
-                ->setProductCode($row['Product Code'])
-                ->setProductName($row['Product Name'])
-                ->setProductDescription($row['Product Description'])
-                ->setStock((int)$row['Stock'])
-                ->setCost((int)$row['Cost in GBP'])
-                ->setDiscontinued($row['Discontinued']);
+        $test = $input->getOption("test");
+        $this->csvImportWorker->importProducts($this->targetDirectory . $file, (bool) $test);
+        $this->csvMailSender->sendEmail(
+            [
+                'total' => $this->csvImportWorker->totalCount,
+                'skipped' => $this->csvImportWorker->skippedCount,
+                'processed' => $this->csvImportWorker->processedCount,
+                'products' => $this->csvImportWorker->products,
+                'errors' => $this->csvImportWorker->getErrors(),
+            ],
+            (bool) !$test
+        );
 
-              $this->em->persist($product);
-              $processed++;
-            }
-          }
-        }
-
-        $this->em->flush();
-        $io->warning($total - $processed.' items were skiped');
-        $io->success($processed.' items imported seccessfuly!');
+        $io->note("Found products: " . $this->csvImportWorker->totalCount);
+        $io->warning($this->csvImportWorker->skippedCount . ' items were skipped');
+        $io->success($this->csvImportWorker->processedCount . ' items imported successfully!');
 
         return 0;
     }
 }
+
