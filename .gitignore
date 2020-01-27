@@ -12,7 +12,6 @@
 .env
 /config/parameters.yaml
 /src/Data/
-/src/SQL/
 ###< symfony/framework-bundle ###
 
 ###> symfony/webpack-encore-bundle ###
