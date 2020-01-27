@@ -35,31 +35,24 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
-            $file->move($file->getPath(), $file->getFilename() . ".csv");
-            $csvImportWorker->importProducts(sprintf("%s/%s.csv",
-                $file->getPath(),
-                $file->getFilename()
-            ), $isTest);
-<<<<<<< HEAD
-            $csvMailSender->sendEmail(
-                [
-                    'total' => $csvImportWorker->totalCount,
-                    'skipped' => $csvImportWorker->skippedCount,
-                    'processed' => $csvImportWorker->processedCount,
-                    'products' => $csvImportWorker->products,
-                    'errors' => $csvImportWorker->getErrors(),
-                ],
-                $isTest
-            );
-=======
+
+            $file->move(sys_get_temp_dir(), $file->getFilename() . ".csv");
+            $csvImportWorker->importProducts(
+                sprintf("%s/%s.csv",
+                    sys_get_temp_dir(),
+                    $file->getFilename()
+                ),
+                $isTest);
             $csvMailSender->sendEmail([
                 'total' => $csvImportWorker->totalCount,
                 'skipped' => $csvImportWorker->skippedCount,
                 'processed' => $csvImportWorker->processedCount,
                 'products' => $csvImportWorker->products,
                 'errors' => $csvImportWorker->getErrors(),
-            ], $isTest);
->>>>>>> Git flow
+
+            ],
+                $isTest
+            );
 
             $this->addFlash(
                 'notice',
