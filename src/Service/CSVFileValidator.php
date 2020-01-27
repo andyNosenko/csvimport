@@ -44,7 +44,6 @@ class CSVFileValidator
      */
     private function validateNumericField($value, Int $rowNumber, String $fieldName): void
     {
-
         if ($this->isEmptyValue($value)) {
             array_push(
                 $this->errorMessages,
@@ -116,7 +115,6 @@ class CSVFileValidator
     private function validateProductCodeField($value, Int $rowNumber, String $fieldName): void
     {
         if ($this->isEmptyValue($value)) {
-
             array_push(
                 $this->errorMessages,
                 $this->buildErrorMessage(
@@ -127,7 +125,6 @@ class CSVFileValidator
                 )
             );
         } elseif (!$this->isCorrectStringLength($value)) {
-
             array_push(
                 $this->errorMessages,
                 $this->buildErrorMessage(

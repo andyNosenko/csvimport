@@ -52,16 +52,26 @@ class Product
      */
     private $category;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getProductCode(): ?string
     {
         return $this->productCode;
     }
 
+    /**
+     * @param string $productCode
+     * @return $this
+     */
     public function setProductCode(string $productCode): self
     {
         $this->productCode = $productCode;
@@ -69,11 +79,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getProductName(): ?string
     {
         return $this->productName;
     }
 
+    /**
+     * @param string $productName
+     * @return $this
+     */
     public function setProductName(string $productName): self
     {
         $this->productName = $productName;
@@ -81,11 +98,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getProductDescription(): ?string
     {
         return $this->productDescription;
     }
 
+    /**
+     * @param string $productDescription
+     * @return $this
+     */
     public function setProductDescription(string $productDescription): self
     {
         $this->productDescription = $productDescription;
@@ -93,11 +117,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return int|null
+     */
     public function getStock(): ?int
     {
         return $this->stock;
     }
 
+    /**
+     * @param int $stock
+     * @return $this
+     */
     public function setStock(int $stock): self
     {
         $this->stock = $stock;
@@ -105,11 +136,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return int|null
+     */
     public function getCost(): ?int
     {
         return $this->cost;
     }
 
+    /**
+     * @param int $cost
+     * @return $this
+     */
     public function setCost(int $cost): self
     {
         $this->cost = $cost;
@@ -117,11 +155,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getDiscontinued(): ?string
     {
         return $this->discontinued;
     }
 
+    /**
+     * @param string|null $discontinued
+     * @return $this
+     */
     public function setDiscontinued(?string $discontinued): self
     {
         $this->discontinued = $discontinued;
@@ -129,11 +174,18 @@ class Product
         return $this;
     }
 
+    /**
+     * @return Category|null
+     */
     public function getCategory(): ?Category
     {
         return $this->category;
     }
 
+    /**
+     * @param Category|null $category
+     * @return $this
+     */
     public function setCategory(?Category $category): self
     {
         $this->category = $category;

@@ -42,7 +42,8 @@ class ProductController extends AbstractController
                     sys_get_temp_dir(),
                     $file->getFilename()
                 ),
-                $isTest);
+                $isTest
+            );
             $csvMailSender->sendEmail(
                 [
                     'total' => $csvImportWorker->totalCount,

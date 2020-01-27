@@ -84,7 +84,6 @@ class CsvImportCommand extends Command
                 'processed' => $this->csvImportWorker->processedCount,
                 'products' => $this->csvImportWorker->products,
                 'errors' => $this->csvImportWorker->getErrors(),
-
             ],
             (bool) !$test
         );
