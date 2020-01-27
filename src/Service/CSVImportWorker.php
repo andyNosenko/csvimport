@@ -88,6 +88,7 @@ class CSVImportWorker
                 $existingCategory = $this->em->getRepository(Category::class)->findOneBy([
                     'name' => $row['Category']
                 ]);
+
                 if (!$existingCategory) {
                     $category = (new Category())
                         ->setName($row['Category']);
