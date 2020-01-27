@@ -85,15 +85,15 @@ class CSVImportWorker
     {
         foreach ($results as $row) {
             if ($this->checkRequirements($row)) {
-                $existCategory = $this->em->getRepository(Category::class)->findOneBy([
+                $existingCategory = $this->em->getRepository(Category::class)->findOneBy([
                     'name' => $row['Category']
                 ]);
-                if(!$existCategory) {
+                if (!$existingCategory) {
                     $category = (new Category())
                         ->setName($row['Category']);
                     $this->em->persist($category);
                 } else {
-                    $category = $existCategory;
+                    $category = $existingCategory;
                 }
 
                 $product = (new Product())
