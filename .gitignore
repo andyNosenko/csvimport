@@ -12,6 +12,7 @@
 .env
 /config/parameters.yaml
 /src/Data/
+composerSymfony5.json
 ###< symfony/framework-bundle ###
 
 ###> symfony/webpack-encore-bundle ###
