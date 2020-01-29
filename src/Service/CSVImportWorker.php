@@ -66,7 +66,6 @@ class CSVImportWorker
      * @param String $path
      * @param bool $isTest
      */
-    //TODO: Instead String path Reader object
     public function importProducts(String $path, Bool $isTest)
     {
         $reader = $this->csvFileReader->read($path);

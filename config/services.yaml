@@ -37,27 +37,27 @@ services:
             $senderEmail: '%adminBox%'
             $recipientEmail: '%recipientBox%'
 
-    email_service:
-        class: App\Rabbit\EmailService
+    product_consumer:
+        class: App\Rabbit\ProductConsumer
 
 old_sound_rabbit_mq:
     connections:
         default:
-            host: 'localhost'
-            user: 'guest'
-            password: 'guest'
-            vhost: 'csv.loc'
+            host: '%rabbitHost%'
+            user: '%rabbitUser%'
+            password: '%rabbitPass%'
+            vhost: '%rabbitVHost%'
     producers:
-        emailing:
+        parsing:
             connection: default
             exchange_options:
-                name: emails
+                name: products
                 type: direct
     consumers:
-        emailing:
+        parsing:
             connection:       default
-            exchange_options: {name: 'emails', type: direct}
-            queue_options:    {name: 'emails'}
-            callback:         email_service
+            exchange_options: {name: 'products', type: direct}
+            queue_options:    {name: 'products'}
+            callback:         product_consumer
 
 

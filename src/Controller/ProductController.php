@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\CSVFileType;
+use App\Rabbit\ProductProducer;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use App\Service\DBProductExporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,8 +23,8 @@ class ProductController extends AbstractController
      * @param Request $request
      * @param CSVImportWorker $csvImportWorker
      * @param CSVMailSender $csvMailSender
+     * @param ContainerInterface $container
      * @return Response
-     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
     public function csvImportAction(
         Request $request,
@@ -43,33 +43,27 @@ class ProductController extends AbstractController
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $file->move($destination, $originalFilename . ".csv");
 
-            if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
-                try {
+            try {
+                if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
                     $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
-                    $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
-                } finally {
-                    $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
+                    $csvMailSender->sendEmail(
+                        [
+                            'total' => $csvImportWorker->totalCount,
+                            'skipped' => $csvImportWorker->skippedCount,
+                            'processed' => $csvImportWorker->processedCount,
+                            'products' => $csvImportWorker->products,
+                            'errors' => $csvImportWorker->getErrors(),
+                        ],
+                        $isTest
+                    );
+                    //$productProducer->add($destination . $originalFilename . ".csv");
+                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
                 }
-
+            } catch (\Exception $e) {
+                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
             }
 
-//            try {
-//                $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
-//                $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
-//            } finally {
-//                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
-//            }
-//
-//            $csvMailSender->sendEmail(
-//                [
-//                    'total' => $csvImportWorker->totalCount,
-//                    'skipped' => $csvImportWorker->skippedCount,
-//                    'processed' => $csvImportWorker->processedCount,
-//                    'products' => $csvImportWorker->products,
-//                    'errors' => $csvImportWorker->getErrors(),
-//                ],
-//                $isTest
-//            );
+
 
             $this->addFlash(
                 'notice',
