@@ -18,8 +18,11 @@ class EmailService implements ConsumerInterface
 
     public function execute(AMQPMessage $msg)
     {
-        echo 'Ну тут типа сообщение пытаюсь отправить: '.$msg->getBody().PHP_EOL;
-        echo 'Отправлено успешно!...';
-        $this->csvImportWorker->importProducts($msg->getBody(), false);
+        if (file_exists($msg->getBody())) {
+            $this->csvImportWorker->importProducts($msg->getBody(), false);
+            echo 'Обработан успешно!...';
+        } else {
+            echo 'Файл с таким именем уже был обработан: '.$msg->getBody().PHP_EOL;
+        }
     }
 }

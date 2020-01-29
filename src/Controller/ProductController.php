@@ -43,10 +43,19 @@ class ProductController extends AbstractController
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $file->move($destination, $originalFilename . ".csv");
 
-            $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
+            if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
+                try {
+                    $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
+                    $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
+                } finally {
+                    $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
+                }
+
+            }
 
 //            try {
 //                $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
+//                $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
 //            } finally {
 //                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
 //            }
