@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class CSVImportWorker
 {
@@ -74,6 +75,7 @@ class CSVImportWorker
         if ($this->csvFileValidator->validate($results)) {
             $this->totalCount = iterator_count($results);
             $this->importToDatabase($results, $isTest);
+            $this->removeFile($path);
         }
     }
 
@@ -135,6 +137,15 @@ class CSVImportWorker
     public function getErrors()
     {
         return $this->csvFileValidator->getErrorMessages();
+    }
+
+    /**
+     * @param String $filePath
+     */
+    public function removeFile(String $filePath): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($filePath);
     }
 }
 

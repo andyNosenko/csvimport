@@ -9,6 +9,8 @@ use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use App\Service\DBProductExporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -27,7 +29,8 @@ class ProductController extends AbstractController
     public function csvImportAction(
         Request $request,
         CSVImportWorker $csvImportWorker,
-        CSVMailSender $csvMailSender
+        CSVMailSender $csvMailSender,
+        ContainerInterface $container
     ) {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
@@ -36,24 +39,28 @@ class ProductController extends AbstractController
             $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
 
-            $file->move(sys_get_temp_dir(), $file->getFilename() . ".csv");
-            $csvImportWorker->importProducts(
-                sprintf("%s/%s.csv",
-                    sys_get_temp_dir(),
-                    $file->getFilename()
-                ),
-                $isTest
-            );
-            $csvMailSender->sendEmail(
-                [
-                    'total' => $csvImportWorker->totalCount,
-                    'skipped' => $csvImportWorker->skippedCount,
-                    'processed' => $csvImportWorker->processedCount,
-                    'products' => $csvImportWorker->products,
-                    'errors' => $csvImportWorker->getErrors(),
-                ],
-                $isTest
-            );
+            $destination = $this->getParameter('uploadDirectory');
+            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $file->move($destination, $originalFilename . ".csv");
+
+            $container->get('old_sound_rabbit_mq.emailing_producer')->publish($destination . $originalFilename . ".csv");
+
+//            try {
+//                $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
+//            } finally {
+//                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
+//            }
+//
+//            $csvMailSender->sendEmail(
+//                [
+//                    'total' => $csvImportWorker->totalCount,
+//                    'skipped' => $csvImportWorker->skippedCount,
+//                    'processed' => $csvImportWorker->processedCount,
+//                    'products' => $csvImportWorker->products,
+//                    'errors' => $csvImportWorker->getErrors(),
+//                ],
+//                $isTest
+//            );
 
             $this->addFlash(
                 'notice',
