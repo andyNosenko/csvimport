@@ -25,6 +25,7 @@ class ProductController extends AbstractController
      * @param CSVMailSender $csvMailSender
      * @param ContainerInterface $container
      * @return Response
+     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
     public function csvImportAction(
         Request $request,
@@ -45,6 +46,7 @@ class ProductController extends AbstractController
 
             try {
                 if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
+                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
                     $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
                     $csvMailSender->sendEmail(
                         [
@@ -57,7 +59,6 @@ class ProductController extends AbstractController
                         $isTest
                     );
                     //$productProducer->add($destination . $originalFilename . ".csv");
-                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
                 }
             } catch (\Exception $e) {
                 $csvImportWorker->removeFile($destination . $originalFilename . ".csv");

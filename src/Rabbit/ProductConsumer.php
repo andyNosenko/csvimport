@@ -46,6 +46,7 @@ class ProductConsumer implements ConsumerInterface
                 ],
                 false
             );
+            $this->csvImportWorker->products = new \ArrayObject();
             echo 'Обработан успешно: '.$msg->getBody().PHP_EOL;
         } else {
             echo 'Файл с таким именем уже был обработан: '.$msg->getBody().PHP_EOL;
