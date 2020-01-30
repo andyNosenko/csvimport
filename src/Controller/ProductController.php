@@ -63,15 +63,14 @@ class ProductController extends AbstractController
                 $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
             }
 
-
-
             $this->addFlash(
                 'notice',
                 'Your file was successfully uploaded!'
             );
 
             if ($csvImportWorker->getErrors()) {
-                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
+                $container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
+                //$csvImportWorker->removeFile($destination . $originalFilename . ".csv");
                 return $this->render("csv/errors.html.twig", [
                     'errors' => $csvImportWorker->getErrors(),
                 ]);

@@ -54,6 +54,7 @@ class ProductConsumer implements ConsumerInterface
             $this->csvImportWorker->totalCount = 0;
             $this->csvImportWorker->skippedCount = 0;
             $this->csvImportWorker->processedCount = 0;
+            $this->csvImportWorker->removeFile($msg->getBody());
             echo 'Обработан успешно: '.$msg->getBody().PHP_EOL;
         } else {
             echo 'Файл с таким именем уже был обработан: '.$msg->getBody().PHP_EOL;
