@@ -37,6 +37,10 @@ services:
             $senderEmail: '%adminBox%'
             $recipientEmail: '%recipientBox%'
 
+    parsing:
+        class: App\Rabbit\ProductProducer
+        decorates: old_sound_rabbit_mq.parsing_producer
+
     product_consumer:
         class: App\Rabbit\ProductConsumer
 

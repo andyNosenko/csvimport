@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\CSVFileType;
-use App\Rabbit\ProductProducer;
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
 use App\Service\DBProductExporter;
@@ -25,7 +24,6 @@ class ProductController extends AbstractController
      * @param CSVMailSender $csvMailSender
      * @param ContainerInterface $container
      * @return Response
-     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
      */
     public function csvImportAction(
         Request $request,
@@ -46,18 +44,19 @@ class ProductController extends AbstractController
 
             try {
                 if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
-                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
-                    $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
-                    $csvMailSender->sendEmail(
-                        [
-                            'total' => $csvImportWorker->totalCount,
-                            'skipped' => $csvImportWorker->skippedCount,
-                            'processed' => $csvImportWorker->processedCount,
-                            'products' => $csvImportWorker->products,
-                            'errors' => $csvImportWorker->getErrors(),
-                        ],
-                        $isTest
-                    );
+//                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
+                    $container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
+//                    $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
+//                    $csvMailSender->sendEmail(
+//                        [
+//                            'total' => $csvImportWorker->totalCount,
+//                            'skipped' => $csvImportWorker->skippedCount,
+//                            'processed' => $csvImportWorker->processedCount,
+//                            'products' => $csvImportWorker->products,
+//                            'errors' => $csvImportWorker->getErrors(),
+//                        ],
+//                        $isTest
+//                    );
                     //$productProducer->add($destination . $originalFilename . ".csv");
                 }
             } catch (\Exception $e) {
@@ -72,6 +71,7 @@ class ProductController extends AbstractController
             );
 
             if ($csvImportWorker->getErrors()) {
+                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
                 return $this->render("csv/errors.html.twig", [
                     'errors' => $csvImportWorker->getErrors(),
                 ]);

@@ -1,30 +1,30 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Rabbit;
 
+use OldSound\RabbitMqBundle\RabbitMq\Producer;
 
-use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
-
-class ProductProducer
+class ProductProducer extends Producer
 {
     /**
-     * @var ProducerInterface
+     * @var Producer
      */
     private $producer;
 
     /**
-     * @param ProducerInterface $producer
+     * @param Producer $producer
      */
-    public function __construct(ProducerInterface $producer)
+    public function __construct(Producer $producer)
     {
         $this->producer = $producer;
     }
 
     /**
-     * @param String $pathFile
+     * @param $pathFile
      */
-    public function add(String $pathFile) {
+    public function add($pathFile) {
         $this->producer->publish($pathFile);
     }
 

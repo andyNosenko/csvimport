@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Rabbit;
 
@@ -15,6 +16,9 @@ class ProductConsumer implements ConsumerInterface
      */
     private $csvImportWorker;
 
+    /**
+     * @var CSVMailSender
+     */
     private $csvMailSender;
 
     /**
@@ -47,6 +51,9 @@ class ProductConsumer implements ConsumerInterface
                 false
             );
             $this->csvImportWorker->products = new \ArrayObject();
+            $this->csvImportWorker->totalCount = 0;
+            $this->csvImportWorker->skippedCount = 0;
+            $this->csvImportWorker->processedCount = 0;
             echo 'Обработан успешно: '.$msg->getBody().PHP_EOL;
         } else {
             echo 'Файл с таким именем уже был обработан: '.$msg->getBody().PHP_EOL;
