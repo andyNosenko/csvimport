@@ -152,6 +152,11 @@ class CSVFileValidator
         }
     }
 
+    /**
+     * @param $value
+     * @param Int $rowNumber
+     * @param String $fieldName
+     */
     private function validateCategoryField($value, Int $rowNumber, String $fieldName): void
     {
         if ($this->isEmptyValue($value)) {
@@ -167,6 +172,10 @@ class CSVFileValidator
         }
     }
 
+    /**
+     * @param $value
+     * @return bool
+     */
     private function isEmptyValue($value): bool
     {
         return $value == "";
