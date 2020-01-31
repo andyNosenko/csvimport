@@ -70,10 +70,12 @@ class CSVImportWorker
     {
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
-        if ($this->csvFileValidator->validate($results)) {
-            $this->totalCount = iterator_count($results);
-            $this->importToDatabase($results, $isTest);
-            $this->removeFile($path);
+        $column = $reader->fetchOne();
+        if ($this->csvFileValidator->validateColumns($column)) {
+            if ($this->csvFileValidator->validate($results)) {
+                $this->totalCount = iterator_count($results);
+                $this->importToDatabase($results, $isTest);
+            }
         }
     }
 

@@ -23,13 +23,14 @@ class ProductController extends AbstractController
      * @param CSVImportWorker $csvImportWorker
      * @param CSVMailSender $csvMailSender
      * @param ContainerInterface $container
+     * @param DBProductExporter $dbProductExporter
      * @return Response
      */
     public function csvImportAction(
         Request $request,
         CSVImportWorker $csvImportWorker,
-        CSVMailSender $csvMailSender,
-        ContainerInterface $container
+        ContainerInterface $container,
+        DBProductExporter $dbProductExporter
     ) {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
@@ -41,26 +42,8 @@ class ProductController extends AbstractController
             $destination = $this->getParameter('uploadDirectory');
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $file->move($destination, $originalFilename . ".csv");
-
-            try {
-                if ($csvImportWorker->isFileValid($destination . $originalFilename . ".csv")) {
-//                    $container->get('old_sound_rabbit_mq.parsing_producer')->publish($destination . $originalFilename . ".csv");
-                    $container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
-//                    $csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
-//                    $csvMailSender->sendEmail(
-//                        [
-//                            'total' => $csvImportWorker->totalCount,
-//                            'skipped' => $csvImportWorker->skippedCount,
-//                            'processed' => $csvImportWorker->processedCount,
-//                            'products' => $csvImportWorker->products,
-//                            'errors' => $csvImportWorker->getErrors(),
-//                        ],
-//                        $isTest
-//                    );
-                }
-            } catch (\Exception $e) {
-                $csvImportWorker->removeFile($destination . $originalFilename . ".csv");
-            }
+            $container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
+            //$csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
 
             $this->addFlash(
                 'notice',
@@ -83,8 +66,10 @@ class ProductController extends AbstractController
                 'errors' => $csvImportWorker->getErrors(),
             ]);
         }
+        $productsView = $dbProductExporter->ReturnProducts($request);
         return $this->render('csv/index.html.twig', [
             'form' => $form->createView(),
+            'productsView' => $productsView
         ]);
     }
 

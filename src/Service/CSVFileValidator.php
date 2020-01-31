@@ -12,6 +12,19 @@ class CSVFileValidator
     private $errorMessages = [];
 
     /**
+     * @var array
+     */
+    private $validFieldsRule = [
+        'Product Code',
+        'Product Name',
+        'Product Description',
+        'Stock',
+        'Cost in GBP',
+        'Discontinued',
+        'Category'
+    ];
+
+    /**
      * @return array
      */
     public function getErrorMessages(): array
@@ -39,6 +52,18 @@ class CSVFileValidator
             $this->validateCategoryField($row['Category'], $key, 'Category');
         }
 
+        return empty($this->errorMessages);
+    }
+
+    /**
+     * @param array $columns
+     * @return bool
+     */
+    public function validateColumns(Array $columns)
+    {
+        if ($columns != $this->validFieldsRule) {
+            array_push($this->errorMessages, "Columns are not valid!");
+        }
         return empty($this->errorMessages);
     }
 
