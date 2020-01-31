@@ -6,8 +6,6 @@
             {{ message }}
         </div>
     {% endfor %}
-    <h1>Total items found: {{ total }}</h1>
-    <br>
     {% if errors %}
         <h1>Sorry, but your csv file is not valid(</h1>
         <p>Please check file and upload again</p>
@@ -18,6 +16,8 @@
         <br>
     {% endif %}
     {% if processed %}
+        <h1>Total items found: {{ total }}</h1>
+        <br>
         <h1>Items were skipped: {{ skipped }}</h1>
         <br>
         <h1>Items were processed: {{ processed }}</h1>

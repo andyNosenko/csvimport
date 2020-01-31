@@ -57,7 +57,6 @@ class ProductController extends AbstractController
 //                        ],
 //                        $isTest
 //                    );
-                    //$productProducer->add($destination . $originalFilename . ".csv");
                 }
             } catch (\Exception $e) {
                 $csvImportWorker->removeFile($destination . $originalFilename . ".csv");

@@ -70,7 +70,6 @@ class CSVImportWorker
     {
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
-
         if ($this->csvFileValidator->validate($results)) {
             $this->totalCount = iterator_count($results);
             $this->importToDatabase($results, $isTest);
@@ -82,7 +81,7 @@ class CSVImportWorker
      * @param String $path
      * @return bool
      */
-    public function isFileValid(String $path):bool
+    public function isFileValid(String $path): bool
     {
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
@@ -147,6 +146,11 @@ class CSVImportWorker
     public function getErrors()
     {
         return $this->csvFileValidator->getErrorMessages();
+    }
+
+    public function resetErrors()
+    {
+        $this->csvFileValidator->setErrorMessages([]);
     }
 
     /**

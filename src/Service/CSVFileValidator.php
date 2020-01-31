@@ -19,6 +19,11 @@ class CSVFileValidator
         return $this->errorMessages;
     }
 
+    public function setErrorMessages($messages)
+    {
+        $this->errorMessages = $messages;
+    }
+
     /**
      * @param \Iterator $data_fields
      * @return bool
