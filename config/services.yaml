@@ -56,11 +56,11 @@ old_sound_rabbit_mq:
             connection: default
             exchange_options:
                 name: products
-                type: direct
+                type: topic
     consumers:
         parsing:
             connection:       default
-            exchange_options: {name: 'products', type: direct}
+            exchange_options: {name: 'products', type: topic}
             queue_options:    {name: 'products'}
             callback:         product_consumer
 

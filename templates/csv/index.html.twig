@@ -4,6 +4,11 @@
 
 {% block body %}
     <div class="container">
+        {% for message in app.flashes('notice') %}
+            <div class="alert alert-notice">
+                {{ message }}
+            </div>
+        {% endfor %}
         {{ form(form) }}
         <br>
         <h2>{% trans %}List of Products{% endtrans %}</h2>

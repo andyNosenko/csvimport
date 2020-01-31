@@ -6,6 +6,7 @@ namespace App\Rabbit;
 
 use App\Service\CSVImportWorker;
 use App\Service\CSVMailSender;
+use App\Service\CSVNotifier;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -21,14 +22,27 @@ class ProductConsumer implements ConsumerInterface
      */
     private $csvMailSender;
 
+    private $csvNotifier;
+
+    private $isValid;
+
+    private $isReported;
+
     /**
      * @param CSVImportWorker $csvImportWorker
      * @param CSVMailSender $csvMailSender
+     * @param CSVNotifier $csvNotifier
      */
-    public function __construct(CSVImportWorker $csvImportWorker, CSVMailSender $csvMailSender)
-    {
+    public function __construct(
+        CSVImportWorker $csvImportWorker,
+        CSVMailSender $csvMailSender,
+        CSVNotifier $csvNotifier
+    ) {
         $this->csvImportWorker = $csvImportWorker;
         $this->csvMailSender = $csvMailSender;
+        $this->csvNotifier = $csvNotifier;
+        $this->isValid = 1;
+        $this->isReported = 0;
     }
 
     /**
@@ -38,8 +52,10 @@ class ProductConsumer implements ConsumerInterface
      */
     public function execute(AMQPMessage $msg)
     {
-        if (file_exists($msg->getBody())) {
-            $this->csvImportWorker->importProducts($msg->getBody(), false);
+        //$msg->getBody();
+        $body = json_decode($msg->body, true);
+        if (file_exists($body['path_file'])) {
+            $this->csvImportWorker->importProducts($body['path_file'], false);
             $this->csvMailSender->sendEmail(
                 [
                     'total' => $this->csvImportWorker->totalCount,
@@ -50,15 +66,28 @@ class ProductConsumer implements ConsumerInterface
                 ],
                 false
             );
+            $this->isReported = 1;
+
+            if ($this->csvImportWorker->getErrors()) {
+                $this->isValid = 0;
+            }
+            $this->csvNotifier->addNotification(
+                $body['path_file'],
+                \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTime']),
+                (bool) $this->isValid,
+                (bool) $this->isReported
+            );
+
             $this->csvImportWorker->products = new \ArrayObject();
             $this->csvImportWorker->totalCount = 0;
             $this->csvImportWorker->skippedCount = 0;
             $this->csvImportWorker->processedCount = 0;
             $this->csvImportWorker->resetErrors();
-            $this->csvImportWorker->removeFile($msg->getBody());
-            echo 'Обработан успешно: '.$msg->getBody().PHP_EOL;
+            $this->isValid = 1;
+            $this->csvImportWorker->removeFile($body['path_file']);
+            echo 'Обработан успешно: ' . $body['path_file'] . PHP_EOL;
         } else {
-            echo 'Файл с таким именем уже был обработан: '.$msg->getBody().PHP_EOL;
+            echo 'Файл с таким именем уже был обработан: ' . $body['path_file'] . PHP_EOL;
         }
     }
 }
