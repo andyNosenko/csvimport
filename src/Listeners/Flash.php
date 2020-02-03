@@ -11,13 +11,22 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Flash
 {
+    /**
+     * @var Session
+     */
     protected $session;
 
+    /**
+     * @param Session $session
+     */
     public function __construct(Session $session)
     {
         $this->session = $session;
     }
 
+    /**
+     * @param ResponseEvent $event
+     */
     public function onKernelResponse(ResponseEvent $event)
     {
         $response = $event->getResponse();
