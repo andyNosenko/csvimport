@@ -37,11 +37,6 @@ services:
             $senderEmail: '%adminBox%'
             $recipientEmail: '%recipientBox%'
 
-    acme_test_bundle.flash_messenger:
-        class: App\Listeners\Flash
-        arguments: ["@session"]
-        tags:
-            - { name: kernel.event_listener, event: kernel.response}
 
     parsing:
         class: App\Rabbit\ProductProducer
@@ -49,6 +44,10 @@ services:
 
     product_consumer:
         class: App\Rabbit\ProductConsumer
+
+    App\Controller\ProductController:
+        arguments:
+            $producer: '@old_sound_rabbit_mq.parsing_producer'
 
 old_sound_rabbit_mq:
     connections:

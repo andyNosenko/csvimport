@@ -3,30 +3,26 @@
 {% block title %}Import your csv file to database{% endblock %}
 
 {% block body %}
-    <div id="flash-messages">
-        {% for flashMessage in app.session.flashbag.get('success') %}
-            <div class="alert alert-success">
-                <button class="close" data-dismiss="alert">&times;</button>
-                {{ flashMessage|trans|raw|nl2br }}
-            </div>
-        {% endfor %}
-
-        {% for flashMessage in app.session.flashbag.get('error') %}
-            <div class="alert alert-error">
-                <button class="close" data-dismiss="alert">&times;</button>
-                {{ flashMessage|trans|raw|nl2br }}
-            </div>
-        {% endfor %}
-
-        {% for flashMessage in app.session.flashbag.get('info') %}
-            <div class="alert alert-info">
-                <button class="close" data-dismiss="alert">&times;</button>
-                {{ flashMessage|trans|raw|nl2br }}
-            </div>
-        {% endfor %}
-    </div>
-
+    {{ encore_entry_script_tags('app') }}
     <div class="container">
+        {% if productPath is empty %}
+            {% set productPath = 'test' %}
+        {% endif %}
+        <div id="ajax-results"></div>
+        <script>
+            $.ajax({
+                url: '{{ path('notification', {'filePath': productPath }) }}',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    "notify": "notify"
+                },
+                async: true,
+                success: function (data, status) {
+                    $('div#ajax-results').html(data.notification)
+                }
+            });
+        </script>
         {% for message in app.flashes('notice') %}
             <div class="flash-notice">
                 {{ message }}

@@ -9,7 +9,6 @@
 import '../css/app.css';
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
-import $ from 'jquery';
-import './notify.min';
-import './notifyAcme';
+//  import $ from 'jquery';
+import 'jquery/src/jquery'
 
