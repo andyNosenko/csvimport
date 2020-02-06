@@ -14,9 +14,6 @@
                 url: '{{ path('notification', {'filePath': productPath }) }}',
                 type: 'POST',
                 dataType: 'json',
-                data: {
-                    "notify": "notify"
-                },
                 async: true,
                 success: function (data, status) {
                     $('div#ajax-results').html(data.notification)

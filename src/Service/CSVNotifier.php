@@ -18,7 +18,7 @@ class CSVNotifier
     /**
      * @param EntityManagerInterface $em
      */
-    public function __construct( EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
@@ -37,12 +37,11 @@ class CSVNotifier
     ) {
         $productLog = new ProductLog();
         $productLog->setFileName($filePath);
-        $productLog->setDateTime($dateTime);
+        $productLog->setProcessedDateTime($dateTime);
         $productLog->setIsValid($isValid);
         $productLog->setIsReported($isReported);
         $this->em->persist($productLog);
         $this->em->flush();
-
     }
 
     /**

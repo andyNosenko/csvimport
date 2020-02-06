@@ -26,7 +26,7 @@ class ProductLog
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateTime;
+    private $processedDateTime;
 
     /**
      * @ORM\Column(type="boolean")
@@ -87,18 +87,18 @@ class ProductLog
     /**
      * @return \DateTimeInterface|null
      */
-    public function getDateTime(): ?\DateTimeInterface
+    public function getProcessedDateTime(): ?\DateTimeInterface
     {
-        return $this->dateTime;
+        return $this->processedDateTime;
     }
 
     /**
-     * @param \DateTimeInterface $dateTime
+     * @param \DateTimeInterface $processedDateTime
      * @return $this
      */
-    public function setDateTime(\DateTimeInterface $dateTime): self
+    public function setProcessedDateTime(\DateTimeInterface $processedDateTime): self
     {
-        $this->dateTime = $dateTime;
+        $this->processedDateTime = $processedDateTime;
 
         return $this;
     }

@@ -47,19 +47,27 @@ class CSVImportWorker
     public $products;
 
     /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidator $CSVFileValidator
+     * @param Filesystem $filesystem
      */
     public function __construct(
         EntityManagerInterface $em,
         CsvFileReader $csvFileReader,
-        CSVFileValidator $CSVFileValidator
+        CSVFileValidator $CSVFileValidator,
+        Filesystem $filesystem
     ) {
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
         $this->csvFileValidator = $CSVFileValidator;
         $this->products = new \ArrayObject();
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -71,6 +79,7 @@ class CSVImportWorker
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
         $column = $reader->fetchOne();
+
         if ($this->csvFileValidator->validateColumns($column)) {
             if ($this->csvFileValidator->validate($results)) {
                 $this->totalCount = iterator_count($results);
@@ -149,8 +158,7 @@ class CSVImportWorker
      */
     public function removeFile(String $filePath): void
     {
-        $filesystem = new Filesystem();
-        $filesystem->remove($filePath);
+        $this->filesystem->remove($filePath);
     }
 }
 

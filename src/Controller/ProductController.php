@@ -52,10 +52,11 @@ class ProductController extends AbstractController
 
             $destination = $this->getParameter('uploadDirectory');
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $file->move($destination, $originalFilename . ".csv");
             $filePath = $destination . $originalFilename . ".csv";
+            $file->move($destination, $originalFilename . ".csv");
+
             //$container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
-            $this->producer->add($destination . $originalFilename . ".csv");
+            $this->producer->add($filePath);
             //$csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
         }
 
@@ -77,21 +78,19 @@ class ProductController extends AbstractController
      */
     public function notifyAction(Request $request, CSVNotifier $csvNotifier, String $filePath)
     {
-        if ($request->request->get('notify')) {
-            $log = $csvNotifier->getNotificationByFilePath($filePath);
-            $validationInfo = $log->getIsValid() ? "is valid" : "is invalid";
-            $reportInfo = $log->getIsReported() ? "Report has been sent to your email:)" : "Report hasn't been sent to your email:(";
-            $notification = sprintf("Your file %s %s. %s",
-                $log->getFileName(),
-                $validationInfo,
-                $reportInfo
-            );
-            $arrData = [
-                'notification' => $notification
-            ];
-            return new JsonResponse($arrData);
-        }
-        return $this->render('csv/index.html.twig');
+        $log = $csvNotifier->getNotificationByFilePath($filePath);
+        $validationInfo = $log->getIsValid() ? "is valid" : "is invalid";
+        $reportInfo = $log->getIsReported() ? "Report has been sent to your email:)" : "Report hasn't been sent to your email:(";
+        $notification = sprintf("Your file %s %s. %s",
+            $log->getFileName(),
+            $validationInfo,
+            $reportInfo
+        );
+        $arrData = [
+            'notification' => $notification
+        ];
+
+        return new JsonResponse($arrData);
     }
 
     /**
