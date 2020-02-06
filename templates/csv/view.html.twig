@@ -13,6 +13,7 @@
                 <th>Stock</th>
                 <th>Cost in GBP</th>
                 <th>Discontinued</th>
+                <th>Category</th>
             </tr>
             {% for product in products %}
                 <tr>
@@ -22,6 +23,7 @@
                     <td>{{ product.stock }}</td>
                     <td>{{ product.cost }}</td>
                     <td>{{ product.discontinued }}</td>
+                    <td>{{ product.category.name }}</td>
                 </tr>
             {% endfor %}
         </table>

@@ -80,17 +80,6 @@ class CSVImportWorker
     }
 
     /**
-     * @param String $path
-     * @return bool
-     */
-    public function isFileValid(String $path): bool
-    {
-        $reader = $this->csvFileReader->read($path);
-        $results = $reader->fetchAssoc();
-        return $this->csvFileValidator->validate($results);
-    }
-
-    /**
      * @param \Iterator $results
      * @param bool $isTest
      */

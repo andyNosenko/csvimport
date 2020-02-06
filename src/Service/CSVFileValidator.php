@@ -14,7 +14,7 @@ class CSVFileValidator
     /**
      * @var array
      */
-    private $validFieldsRule = [
+    private $validColumnsRule = [
         'Product Code',
         'Product Name',
         'Product Description',
@@ -61,7 +61,7 @@ class CSVFileValidator
      */
     public function validateColumns(Array $columns)
     {
-        if ($columns != $this->validFieldsRule) {
+        if ($columns != $this->validColumnsRule) {
             array_push($this->errorMessages, "Columns are not valid!");
         }
         return empty($this->errorMessages);
