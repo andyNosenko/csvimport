@@ -54,4 +54,23 @@ class CSVNotifier
             'fileName' => $filePath,
         ]);
     }
+
+    /**
+     * @return ProductLog|object|null
+     */
+    public function getAllNotifications()
+    {
+        return $this->em->getRepository(ProductLog::class)->findBy([
+            'isReported' => 0,
+        ]);
+    }
+
+    public function setAsReportedNotifications()
+    {
+        foreach ($this->getAllNotifications() as $log) {
+            $log->setIsReported(true);
+            $this->em->persist($log);
+            $this->em->flush();
+        }
+    }
 }

@@ -27,7 +27,7 @@ class ProductProducer extends Producer
     public function add($pathFile) {
         $message = [
             'path_file' => $pathFile,
-            'dateTime' => date('Y-m-d H:i:s')
+            'dateTimeUploaded' => date('Y-m-d H:i:s')
         ];
         $this->producer->publish(json_encode($message));
     }

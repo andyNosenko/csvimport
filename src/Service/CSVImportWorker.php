@@ -29,45 +29,103 @@ class CSVImportWorker
     /**
      * @var int
      */
-    public $totalCount;
+    private $totalCount = 0;
 
     /**
      * @var int
      */
-    public $processedCount;
+    private $processedCount = 0;
 
     /**
      * @var int
      */
-    public $skippedCount;
+    private $skippedCount = 0;
 
     /**
      * @var \ArrayObject
      */
-    public $products;
+    private $products;
 
     /**
-     * @var Filesystem
+     * @return int
      */
-    private $filesystem;
+    public function getTotalCount(): int
+    {
+        return $this->totalCount;
+    }
+
+    /**
+     * @param int $totalCount
+     */
+    public function setTotalCount(int $totalCount): void
+    {
+        $this->totalCount = $totalCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProcessedCount(): int
+    {
+        return $this->processedCount;
+    }
+
+    /**
+     * @param int $processedCount
+     */
+    public function setProcessedCount(int $processedCount): void
+    {
+        $this->processedCount = $processedCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSkippedCount(): int
+    {
+        return $this->skippedCount;
+    }
+
+    /**
+     * @param int $skippedCount
+     */
+    public function setSkippedCount(int $skippedCount): void
+    {
+        $this->skippedCount = $skippedCount;
+    }
+
+    /**
+     * @return \ArrayObject
+     */
+    public function getProducts(): \ArrayObject
+    {
+        return $this->products;
+    }
+
+    /**
+     * @param \ArrayObject $products
+     */
+    public function setProducts(\ArrayObject $products): void
+    {
+        $this->products = $products;
+    }
+
 
     /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidator $CSVFileValidator
-     * @param Filesystem $filesystem
+
      */
     public function __construct(
         EntityManagerInterface $em,
         CsvFileReader $csvFileReader,
-        CSVFileValidator $CSVFileValidator,
-        Filesystem $filesystem
+        CSVFileValidator $CSVFileValidator
     ) {
         $this->em = $em;
         $this->csvFileReader = $csvFileReader;
         $this->csvFileValidator = $CSVFileValidator;
         $this->products = new \ArrayObject();
-        $this->filesystem = $filesystem;
     }
 
     /**
@@ -153,12 +211,13 @@ class CSVImportWorker
         $this->csvFileValidator->setErrorMessages([]);
     }
 
-    /**
-     * @param String $filePath
-     */
-    public function removeFile(String $filePath): void
+    public function resetProductCounters()
     {
-        $this->filesystem->remove($filePath);
+        $this->products = new \ArrayObject();
+        $this->totalCount = 0;
+        $this->skippedCount = 0;
+        $this->processedCount = 0;
+        $this->resetErrors();
     }
 }
 

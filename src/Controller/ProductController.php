@@ -44,7 +44,6 @@ class ProductController extends AbstractController
     ) {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
-        $filePath = "";
 
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form["file"]->getData();
@@ -55,42 +54,42 @@ class ProductController extends AbstractController
             $filePath = $destination . $originalFilename . ".csv";
             $file->move($destination, $originalFilename . ".csv");
 
-            //$container->get('old_sound_rabbit_mq.parsing_producer')->add($destination . $originalFilename . ".csv");
             $this->producer->add($filePath);
-            //$csvImportWorker->importProducts($destination . $originalFilename . ".csv", $isTest);
         }
 
         $productsView = $dbProductExporter->ReturnProducts($request);
         return $this->render('csv/index.html.twig', [
             'form' => $form->createView(),
             'productsView' => $productsView,
-            'productPath' => $filePath,
         ]);
     }
 
-
     /**
-     * @Route("/notification/{filePath}", name="notification", requirements={"filePath"=".+"})
+     * @Route("/notifications", name="notifications")
      * @param Request $request
      * @param CSVNotifier $csvNotifier
-     * @param String $filePath
      * @return JsonResponse|Response
      */
-    public function notifyAction(Request $request, CSVNotifier $csvNotifier, String $filePath)
+    public function notificationsAction(Request $request, CSVNotifier $csvNotifier)
     {
-        $log = $csvNotifier->getNotificationByFilePath($filePath);
-        $validationInfo = $log->getIsValid() ? "is valid" : "is invalid";
-        $reportInfo = $log->getIsReported() ? "Report has been sent to your email:)" : "Report hasn't been sent to your email:(";
-        $notification = sprintf("Your file %s %s. %s",
-            $log->getFileName(),
-            $validationInfo,
-            $reportInfo
-        );
-        $arrData = [
-            'notification' => $notification
-        ];
+        $logs = $csvNotifier->getAllNotifications();
+        $notifications = [];
+        foreach ($logs as $log) {
+            $validationInfo = $log->getIsValid() ? "is valid" : "is invalid";
+            $notification = sprintf("Your file %s %s.\n",
+                $log->getFileName(),
+                $validationInfo
+            );
+            $arrData = [
+                'notification' => $notification
+            ];
+            array_push($notifications, $arrData);
 
-        return new JsonResponse($arrData);
+
+        }
+        $csvNotifier->setAsReportedNotifications();
+
+        return new JsonResponse($notifications);
     }
 
     /**

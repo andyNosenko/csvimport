@@ -9,6 +9,7 @@ use App\Service\CSVMailSender;
 use App\Service\CSVNotifier;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class ProductConsumer implements ConsumerInterface
@@ -39,20 +40,28 @@ class ProductConsumer implements ConsumerInterface
     private $isReported;
 
     /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
      * @param CSVImportWorker $csvImportWorker
      * @param CSVMailSender $csvMailSender
      * @param CSVNotifier $csvNotifier
+     * @param Filesystem $filesystem
      */
     public function __construct(
         CSVImportWorker $csvImportWorker,
         CSVMailSender $csvMailSender,
-        CSVNotifier $csvNotifier
+        CSVNotifier $csvNotifier,
+        Filesystem $filesystem
     ) {
         $this->csvImportWorker = $csvImportWorker;
         $this->csvMailSender = $csvMailSender;
         $this->csvNotifier = $csvNotifier;
         $this->isValid = 1;
         $this->isReported = 0;
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -70,8 +79,8 @@ class ProductConsumer implements ConsumerInterface
             $this->csvImportWorker->getErrors() ? $this->isValid = 0 : $this->isValid = 1;
 
             $this->addNotification($body);
-            $this->resetProductCounters();
-            $this->csvImportWorker->removeFile($body['path_file']);
+            $this->csvImportWorker->resetProductCounters();
+            $this->removeFile($body['path_file']);
             echo 'Обработан успешно: ' . $body['path_file'] . PHP_EOL;
         } else {
             echo 'Файл с таким именем уже был обработан: ' . $body['path_file'] . PHP_EOL;
@@ -83,17 +92,17 @@ class ProductConsumer implements ConsumerInterface
         try {
             $this->csvMailSender->sendEmail(
                 [
-                    'total' => $this->csvImportWorker->totalCount,
-                    'skipped' => $this->csvImportWorker->skippedCount,
-                    'processed' => $this->csvImportWorker->processedCount,
-                    'products' => $this->csvImportWorker->products,
+                    'total' => $this->csvImportWorker->getTotalCount(),
+                    'skipped' => $this->csvImportWorker->getSkippedCount(),
+                    'processed' => $this->csvImportWorker->getProcessedCount(),
+                    'products' => $this->csvImportWorker->getProducts(),
                     'errors' => $this->csvImportWorker->getErrors(),
                 ],
                 false
             );
         } catch (TransportExceptionInterface $e) {
         }
-        $this->isReported = 1;
+        //$this->isReported = 1;
     }
 
     /**
@@ -103,18 +112,17 @@ class ProductConsumer implements ConsumerInterface
     {
         $this->csvNotifier->addNotification(
             $body['path_file'],
-            \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTime']),
+            \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTimeUploaded']),
             (bool) $this->isValid,
             (bool) $this->isReported
         );
     }
 
-    private function resetProductCounters()
+    /**
+     * @param String $filePath
+     */
+    public function removeFile(String $filePath): void
     {
-        $this->csvImportWorker->products = new \ArrayObject();
-        $this->csvImportWorker->totalCount = 0;
-        $this->csvImportWorker->skippedCount = 0;
-        $this->csvImportWorker->processedCount = 0;
-        $this->csvImportWorker->resetErrors();
+        $this->filesystem->remove($filePath);
     }
 }

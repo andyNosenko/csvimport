@@ -4,22 +4,12 @@
 
 {% block body %}
     {{ encore_entry_script_tags('app') }}
+    {{ encore_entry_script_tags('notifications') }}
     <div class="container">
         {% if productPath is empty %}
             {% set productPath = 'test' %}
         {% endif %}
         <div id="ajax-results"></div>
-        <script>
-            $.ajax({
-                url: '{{ path('notification', {'filePath': productPath }) }}',
-                type: 'POST',
-                dataType: 'json',
-                async: true,
-                success: function (data, status) {
-                    $('div#ajax-results').html(data.notification)
-                }
-            });
-        </script>
         {% for message in app.flashes('notice') %}
             <div class="flash-notice">
                 {{ message }}
