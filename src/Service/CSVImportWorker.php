@@ -7,7 +7,6 @@ namespace App\Service;
 use App\Entity\Category;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 class CSVImportWorker
 {

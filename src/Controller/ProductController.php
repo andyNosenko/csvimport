@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\CSVFileType;
-use App\Service\CSVImportWorker;
 use App\Service\CSVNotifier;
 use App\Service\DBProductExporter;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
@@ -33,13 +32,11 @@ class ProductController extends AbstractController
     /**
      * @Route("/importfile", name="importfile")
      * @param Request $request
-     * @param CSVImportWorker $csvImportWorker
      * @param DBProductExporter $dbProductExporter
      * @return Response
      */
     public function csvImportAction(
         Request $request,
-        CSVImportWorker $csvImportWorker,
         DBProductExporter $dbProductExporter
     ) {
         $form = $this->createForm(CSVFileType::class);
@@ -75,10 +72,9 @@ class ProductController extends AbstractController
         $logs = $csvNotifier->getAllNotifications();
         $notifications = [];
         foreach ($logs as $log) {
-            $validationInfo = $log->getIsValid() ? "is valid" : "is invalid";
             $notification = sprintf("Your file %s %s.\n",
                 $log->getFileName(),
-                $validationInfo
+                $log->getIsValid() ? "is valid" : "is invalid"
             );
             $arrData = [
                 'notification' => $notification

@@ -3,8 +3,10 @@
 {% block title %}Import your csv file to database{% endblock %}
 
 {% block body %}
-    {{ encore_entry_script_tags('app') }}
-    {{ encore_entry_script_tags('notifications') }}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+        {{ encore_entry_script_tags('notifications') }}
+    {% endblock %}
     <div class="container">
         {% if productPath is empty %}
             {% set productPath = 'test' %}

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-
 use App\Entity\ProductLog;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -29,7 +28,7 @@ class CSVNotifier
      * @param bool $isValid
      * @param bool $isReported
      */
-    public function addNotification(
+    public function createNotification(
         String $filePath,
         \DateTime $dateTime,
         Bool $isValid,

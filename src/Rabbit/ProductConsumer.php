@@ -78,7 +78,7 @@ class ProductConsumer implements ConsumerInterface
 
             $this->csvImportWorker->getErrors() ? $this->isValid = 0 : $this->isValid = 1;
 
-            $this->addNotification($body);
+            $this->createNotification($body);
             $this->csvImportWorker->resetProductCounters();
             $this->removeFile($body['path_file']);
             echo 'Обработан успешно: ' . $body['path_file'] . PHP_EOL;
@@ -108,9 +108,9 @@ class ProductConsumer implements ConsumerInterface
     /**
      * @param $body
      */
-    private function addNotification($body)
+    private function createNotification($body)
     {
-        $this->csvNotifier->addNotification(
+        $this->csvNotifier->createNotification(
             $body['path_file'],
             \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTimeUploaded']),
             (bool) $this->isValid,

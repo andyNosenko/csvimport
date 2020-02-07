@@ -38,7 +38,7 @@ class DBProductExporter
     public function ReturnProducts($request)
     {
        return $this->paginator->paginate(
-            $em = $this->em->getRepository(Product::class)->findAll(),
+            $this->em->getRepository(Product::class)->findAll(),
             $request->query->getInt('page', 1),
             $request->query->getInt('limit', 10)
         );
