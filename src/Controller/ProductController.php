@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Category;
+use App\Entity\Product;
 use App\Form\CSVFileType;
+use App\Form\EditProductType;
 use App\Service\CSVNotifier;
 use App\Service\DBProductExporter;
+use Doctrine\ORM\EntityManagerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +44,8 @@ class ProductController extends AbstractController
     public function csvImportAction(
         Request $request,
         DBProductExporter $dbProductExporter
-    ) {
+    )
+    {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
 
@@ -59,6 +66,106 @@ class ProductController extends AbstractController
             'form' => $form->createView(),
             'productsView' => $productsView,
         ]);
+    }
+
+    /**
+     * @Route("/edit/{id}", name="edit_product")
+     * @ParamConverter("product", class="SensioBlogBundle:Product")
+     * @param Request $request
+     * @param Product $product
+     * @param EntityManagerInterface $em
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @throws \Exception
+     */
+    public function editProductAction(Request $request, int $id, EntityManagerInterface $em)
+    {
+        $product = $em->getRepository(Product::class)->findOneBy([
+            'id' => $id,
+        ]);
+        $form = $this->createForm(EditProductType::class, $product, [
+            'action' => $this->generateUrl('edit_product', [
+                'id' => $product->getId()
+            ]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $product = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($product);
+            $em->flush();
+            return $this->redirectToRoute('importfile');
+        }
+
+        return $this->render('csv/edit_product.html.twig', [
+            'form' => $form->createView(),
+        ]);
+
+    }
+
+    /**
+     * @Route("/product/{id}", name="get_product_by_id")
+     * @param Request $request
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse|Response
+     */
+    public function getProductAction(Request $request, int $id, EntityManagerInterface $em)
+    {
+        $product = $em->getRepository(Product::class)->findOneBy([
+            'id' => $id,
+        ]);
+        $data = [
+            'product_code' => $product->getProductCode(),
+            'product_name' => $product->getProductName(),
+            'product_description' => $product->getProductDescription(),
+            'stock' => $product->getStock(),
+            'cost' => $product->getCost(),
+            'discontinued' => $product->getDiscontinued(),
+            'category' => $product->getCategory()->getName()
+        ];
+        return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/save/{id}", name="save_product_by_id")
+     * @param Request $request
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse|Response
+     */
+    public function saveProductAction(Request $request, int $id, EntityManagerInterface $em)
+    {
+        $product = $em->getRepository(Product::class)->findOneBy([
+            'id' => $id,
+        ]);
+
+        if ($request->isMethod('POST')) {
+            $productCode = $request->get('product_code');
+            $productName = $request->get('product_name');
+            $productDescription = $request->get('product_description');
+            $stock = $request->get('stock');
+            $cost = $request->get('cost');
+            $discontinued = $request->get('discontinued');
+            $category = $request->get('category');
+        }
+
+        $categoryId = $em->getRepository(Category::class)->findOneBy([
+            'name' => $category,
+        ]);
+
+        $product->setProductCode($productCode);
+        $product->setProductName($productName);
+        $product->setProductDescription($productDescription);
+        $product->setStock((int) $stock);
+        $product->setCost((int) $cost);
+        $product->setDiscontinued($discontinued);
+        $product->setCategory($categoryId);
+        $em->persist($product);
+        $em->flush();
+
+        return new JsonResponse($productCode);
     }
 
     /**
