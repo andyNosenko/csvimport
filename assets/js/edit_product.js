@@ -1,4 +1,9 @@
 $(document).ready(function () {
+
+    $( document ).ajaxError(function( event, jqxhr, settings, exception ) {
+        alert( "Triggered ajaxError handler." );
+    });
+
     $('.edit').click(function () {
         var  button = $(this);
         var id = button.data("whatever");
@@ -33,14 +38,15 @@ $(document).ready(function () {
                     $.ajax({
                         url: '/save/'+id,
                         type: 'POST',
-                        dataType: 'object',
+                        dataType: 'json',
                         data: product,
                         async: true,
                         success: function (data, status) {
-                            alert(data)
+                            alert(data);
+                            location.reload();
                         },
                         error: function(error) {
-                            location.reload();
+                            alert(error);
                         }
                     });
 

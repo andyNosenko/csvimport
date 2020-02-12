@@ -44,8 +44,7 @@ class ProductController extends AbstractController
     public function csvImportAction(
         Request $request,
         DBProductExporter $dbProductExporter
-    )
-    {
+    ) {
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
 
@@ -158,14 +157,17 @@ class ProductController extends AbstractController
         $product->setProductCode($productCode);
         $product->setProductName($productName);
         $product->setProductDescription($productDescription);
-        $product->setStock((int) $stock);
-        $product->setCost((int) $cost);
+        $product->setStock((int)$stock);
+        $product->setCost((int)$cost);
         $product->setDiscontinued($discontinued);
         $product->setCategory($categoryId);
         $em->persist($product);
         $em->flush();
 
-        return new JsonResponse($productCode);
+        return new JsonResponse('Saved successfully!', 200,
+            [
+                'Content-Type' => 'text/html'
+            ]);
     }
 
     /**
