@@ -39,6 +39,11 @@ class ProductLog
     private $isReported;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="productLogs")
+     */
+    private $user;
+
+    /**
      * @return int|null
      */
     public function getId(): ?int
@@ -118,6 +123,18 @@ class ProductLog
     public function setIsReported(bool $isReported): self
     {
         $this->isReported = $isReported;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

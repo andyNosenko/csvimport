@@ -74,7 +74,7 @@ class ProductConsumer implements ConsumerInterface
 
         if (file_exists($body['path_file'])) {
             $this->csvImportWorker->importProducts($body['path_file'], false);
-            $this->sendEmail();
+//            $this->sendEmail();
 
             $this->csvImportWorker->getErrors() ? $this->isValid = 0 : $this->isValid = 1;
 
@@ -114,7 +114,8 @@ class ProductConsumer implements ConsumerInterface
             $body['path_file'],
             \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTimeUploaded']),
             (bool) $this->isValid,
-            (bool) $this->isReported
+            (bool) $this->isReported,
+            $body['user']
         );
     }
 

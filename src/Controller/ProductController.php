@@ -12,13 +12,13 @@ use App\Service\CSVNotifier;
 use App\Service\DBProductExporter;
 use Doctrine\ORM\EntityManagerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ProductController extends AbstractController
 {
@@ -39,6 +39,7 @@ class ProductController extends AbstractController
      * @Route("/importfile", name="importfile")
      * @param Request $request
      * @param DBProductExporter $dbProductExporter
+     * @param AuthorizationCheckerInterface $authChecker
      * @return Response
      */
     public function csvImportAction(
@@ -48,6 +49,7 @@ class ProductController extends AbstractController
         $form = $this->createForm(CSVFileType::class);
         $form->handleRequest($request);
 
+        $user = $this->get('security.token_storage')->getToken()->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form["file"]->getData();
             $isTest = $form["test"]->getData();
@@ -57,7 +59,7 @@ class ProductController extends AbstractController
             $filePath = $destination . $originalFilename . ".csv";
             $file->move($destination, $originalFilename . ".csv");
 
-            $this->producer->add($filePath);
+            $this->producer->add($filePath, $user->getId());
         }
 
         $productsView = $dbProductExporter->ReturnProducts($request);
@@ -178,7 +180,9 @@ class ProductController extends AbstractController
      */
     public function notificationsAction(Request $request, CSVNotifier $csvNotifier)
     {
-        $logs = $csvNotifier->getAllNotifications();
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        //$logs = $csvNotifier->getAllNotifications();
+        $logs = $csvNotifier->getAllUserNotifications($user->getId());
         $notifications = [];
         foreach ($logs as $log) {
             $notification = sprintf("Your file %s %s.\n",
@@ -192,7 +196,8 @@ class ProductController extends AbstractController
 
 
         }
-        $csvNotifier->setAsReportedNotifications();
+        //$csvNotifier->setAsReportedNotifications();
+        $csvNotifier->setAsReportedUserNotifications($user->getId());
 
         return new JsonResponse($notifications);
     }

@@ -37,6 +37,11 @@ services:
             $senderEmail: '%adminBox%'
             $recipientEmail: '%recipientBox%'
 
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%kernel.project_dir%/public/uploads/images/'
+
+
 
     parsing:
         class: App\Rabbit\ProductProducer
@@ -68,5 +73,4 @@ old_sound_rabbit_mq:
             exchange_options: {name: 'products', type: topic}
             queue_options:    {name: 'products'}
             callback:         product_consumer
-
 

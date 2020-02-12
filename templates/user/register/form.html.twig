@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello{% endblock %}
+
+{% block body %}
+    <div class="row">
+    <div class="col-6 offset-3">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h1 class="text-center">Register</h1>
+                {{ form_start(form) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.password) }}
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.image) }}
+                <button class="btn btn-primary btn-block">Register</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

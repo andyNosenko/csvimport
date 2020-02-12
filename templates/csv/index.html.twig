@@ -5,20 +5,19 @@
 {% block body %}
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
-        {{ encore_entry_script_tags('notifications') }}
-        {{ encore_entry_script_tags('edit_product') }}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            {{ encore_entry_script_tags('notifications') }}
+            {{ encore_entry_script_tags('edit_product') }}
+        {% endif %}
     {% endblock %}
     <div class="container">
-        {% if productPath is empty %}
-            {% set productPath = 'test' %}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <a href="{{ path('logout') }}" >Logout</a>
         {% endif %}
         <div id="ajax-results"></div>
-        {% for message in app.flashes('notice') %}
-            <div class="flash-notice">
-                {{ message }}
-            </div>
-        {% endfor %}
-        {{ form(form) }}
+        {% if is_granted("ROLE_ADMIN") == true %}
+            {{ form(form) }}
+        {% endif %}
         <br>
         <h2>{% trans %}List of Products{% endtrans %}</h2>
 
@@ -33,7 +32,9 @@
                 <th>Cost in GBP</th>
                 <th>Discontinued</th>
                 <th>Category</th>
-                <th>Actions</th>
+                {% if is_granted("ROLE_ADMIN") == true %}
+                    <th>Actions</th>
+                {% endif %}
             </tr>
             {% for product in productsView %}
                 <tr>
@@ -44,12 +45,14 @@
                     <td>{{ product.cost }}</td>
                     <td>{{ product.discontinued }}</td>
                     <td>{{ product.category.name }}</td>
-                    <td>
-                        <button type="button" class="btn btn-primary edit" data-toggle="modal"
-                                data-target="#exampleModalLong" data-whatever="{{ product.id }}">
-                            Edit
-                        </button>
-                    </td>
+                    {% if is_granted("ROLE_ADMIN") == true %}
+                        <td>
+                            <button type="button" class="btn btn-primary edit" data-toggle="modal"
+                                    data-target="#exampleModalLong" data-whatever="{{ product.id }}">
+                                Edit
+                            </button>
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>
