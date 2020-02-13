@@ -169,7 +169,8 @@ class ProductController extends AbstractController
         return new JsonResponse('Saved successfully!', 200,
             [
                 'Content-Type' => 'text/html'
-            ]);
+            ]
+        );
     }
 
     /**
@@ -181,7 +182,6 @@ class ProductController extends AbstractController
     public function notificationsAction(Request $request, CSVNotifier $csvNotifier)
     {
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        //$logs = $csvNotifier->getAllNotifications();
         $logs = $csvNotifier->getAllUserNotifications($user->getId());
         $notifications = [];
         foreach ($logs as $log) {
@@ -192,12 +192,9 @@ class ProductController extends AbstractController
             $arrData = [
                 'notification' => $notification
             ];
-            array_push($notifications, $arrData);
-
-
+            $notifications[] = $arrData;
         }
-        //$csvNotifier->setAsReportedNotifications();
-        $csvNotifier->setAsReportedUserNotifications($user->getId());
+        $csvNotifier->setAsReportedUserNotifications($logs);
 
         return new JsonResponse($notifications);
     }

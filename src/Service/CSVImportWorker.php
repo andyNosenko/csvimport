@@ -54,27 +54,11 @@ class CSVImportWorker
     }
 
     /**
-     * @param int $totalCount
-     */
-    public function setTotalCount(int $totalCount): void
-    {
-        $this->totalCount = $totalCount;
-    }
-
-    /**
      * @return int
      */
     public function getProcessedCount(): int
     {
         return $this->processedCount;
-    }
-
-    /**
-     * @param int $processedCount
-     */
-    public function setProcessedCount(int $processedCount): void
-    {
-        $this->processedCount = $processedCount;
     }
 
     /**
@@ -86,14 +70,6 @@ class CSVImportWorker
     }
 
     /**
-     * @param int $skippedCount
-     */
-    public function setSkippedCount(int $skippedCount): void
-    {
-        $this->skippedCount = $skippedCount;
-    }
-
-    /**
      * @return \ArrayObject
      */
     public function getProducts(): \ArrayObject
@@ -102,19 +78,9 @@ class CSVImportWorker
     }
 
     /**
-     * @param \ArrayObject $products
-     */
-    public function setProducts(\ArrayObject $products): void
-    {
-        $this->products = $products;
-    }
-
-
-    /**
      * @param EntityManagerInterface $em
      * @param \App\Service\CsvFileReader $csvFileReader
      * @param \App\Service\CSVFileValidator $CSVFileValidator
-
      */
     public function __construct(
         EntityManagerInterface $em,
