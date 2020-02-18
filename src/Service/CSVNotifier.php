@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Entity\ProductLog;
+use App\Entity\ProductUploadLog;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -41,7 +41,7 @@ class CSVNotifier
             'id' => $userId
         ]);
 
-        $productLog = new ProductLog();
+        $productLog = new ProductUploadLog();
         $productLog->setFileName($filePath);
         $productLog->setProcessedDateTime($dateTime);
         $productLog->setIsValid($isValid);
@@ -57,7 +57,7 @@ class CSVNotifier
      */
     public function getAllUserNotifications(int $userId)
     {
-       return $this->em->getRepository(ProductLog::class)->findBy([
+       return $this->em->getRepository(ProductUploadLog::class)->findBy([
            'isReported' => 0,
            'user' => $userId,
        ]);

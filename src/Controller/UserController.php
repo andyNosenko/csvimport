@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\RegisterType;
 use App\Service\FileUploader;
+use App\Service\UserService\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,6 +20,19 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 class UserController extends AbstractController
 {
+    /**
+     * @var \App\Service\UserService\UserService
+     */
+    private $user;
+
+    /**
+     * UserController constructor.
+     * @param \App\Service\UserService\UserService $user
+     */
+    public function __construct(UserService $user)
+    {
+        $this->user = $user;
+    }
 
     /**
      * @Route("/login", name="login")
@@ -26,45 +40,27 @@ class UserController extends AbstractController
      * @param AuthenticationUtils $utils
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function login(Request $request, AuthenticationUtils $utils)
+    public function login(Request $request)
     {
-        $error = $utils->getLastAuthenticationError();
-        $lastUserName = $utils->getLastUsername();
         return $this->render('user/login/index.html.twig', [
-            'error' => $error,
-            'last_username' => $lastUserName,
+            'error' => $this->user->getUserLastAuthenticationError(),
+            'last_username' => $this->user->getUserLastUsername(),
         ]);
     }
-
 
     /**
      * @Route("/register", name="register")
      * @param Request $request
-     * @param UserPasswordEncoderInterface $passwordEncoder
-     * @param FileUploader $fileUploader
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, FileUploader $fileUploader)
+    public function register(Request $request)
     {
-
-        $user = new User();
-
-        $user->setRoles(['ROLE_USER']);
-        $form = $this->createForm(RegisterType::class, $user);
+        $form = $this->createForm(RegisterType::class, $this->user->getUser());
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
-            $image = $form['image']->getData();
-            if ($image) {
-                $imageFileName = $fileUploader->upload($image);
-                $user->setImage($imageFileName);
-            }
-            $user->setPassword($passwordEncoder->encodePassword($user, $user->getPassword()));
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
+            $this->user->registerUser($form);
             return $this->redirectToRoute('login');
         }
         return $this->render('user/register/form.html.twig', [
@@ -77,7 +73,5 @@ class UserController extends AbstractController
      */
     public function logout()
     {
-
     }
-
 }

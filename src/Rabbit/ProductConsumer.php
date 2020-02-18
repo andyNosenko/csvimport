@@ -59,7 +59,7 @@ class ProductConsumer implements ConsumerInterface
         $this->csvImportWorker = $csvImportWorker;
         $this->csvMailSender = $csvMailSender;
         $this->csvNotifier = $csvNotifier;
-        $this->isValid = 1;
+        $this->isValid = true;
         $this->isReported = 0;
         $this->filesystem = $filesystem;
     }

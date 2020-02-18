@@ -53,7 +53,7 @@ class User implements UserInterface
     private $image;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ProductLog", mappedBy="user_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\ProductUploadLog", mappedBy="user_id")
      */
     private $productLogs;
 
@@ -198,14 +198,14 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|ProductLog[]
+     * @return Collection|ProductUploadLog[]
      */
     public function getProductLogs(): Collection
     {
         return $this->productLogs;
     }
 
-    public function addProductLog(ProductLog $productLog): self
+    public function addProductLog(ProductUploadLog $productLog): self
     {
         if (!$this->productLogs->contains($productLog)) {
             $this->productLogs[] = $productLog;
@@ -215,7 +215,7 @@ class User implements UserInterface
         return $this;
     }
 
-    public function removeProductLog(ProductLog $productLog): self
+    public function removeProductLog(ProductUploadLog $productLog): self
     {
         if ($this->productLogs->contains($productLog)) {
             $this->productLogs->removeElement($productLog);

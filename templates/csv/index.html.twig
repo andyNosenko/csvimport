@@ -48,7 +48,7 @@
                     {% if is_granted("ROLE_ADMIN") == true %}
                         <td>
                             <button type="button" class="btn btn-primary edit" data-toggle="modal"
-                                    data-target="#exampleModalLong" data-whatever="{{ product.id }}">
+                                    data-target="#exampleModalLong" data-product-id="{{ product.id }}">
                                 Edit
                             </button>
                         </td>

@@ -36,7 +36,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/importfile", name="importfile")
+     * @Route("/importfile", options={"expose"=true}, name="importfile")
      * @param Request $request
      * @param DBProductExporter $dbProductExporter
      * @param AuthorizationCheckerInterface $authChecker
@@ -70,7 +70,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/edit/{id}", name="edit_product")
+     * @Route("/edit/{id}", options={"expose"=true}, name="edit_product")
      * @ParamConverter("product", class="SensioBlogBundle:Product")
      * @param Request $request
      * @param Product $product
@@ -102,11 +102,10 @@ class ProductController extends AbstractController
         return $this->render('csv/edit_product.html.twig', [
             'form' => $form->createView(),
         ]);
-
     }
 
     /**
-     * @Route("/product/{id}", name="get_product_by_id")
+     * @Route("/product/{id}", options={"expose"=true}, name="get_product_by_id")
      * @param Request $request
      * @param int $id
      * @param EntityManagerInterface $em
@@ -130,7 +129,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/save/{id}", name="save_product_by_id")
+     * @Route("/save/{id}", options={"expose"=true}, name="save_product_by_id")
      * @param Request $request
      * @param int $id
      * @param EntityManagerInterface $em
@@ -166,7 +165,9 @@ class ProductController extends AbstractController
         $em->persist($product);
         $em->flush();
 
-        return new JsonResponse('Saved successfully!', 200,
+        return new JsonResponse(
+            'Saved successfully!',
+            200,
             [
                 'Content-Type' => 'text/html'
             ]
@@ -174,7 +175,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/notifications", name="notifications")
+     * @Route("/notifications", options={"expose"=true}, name="notifications")
      * @param Request $request
      * @param CSVNotifier $csvNotifier
      * @return JsonResponse|Response
@@ -185,7 +186,8 @@ class ProductController extends AbstractController
         $logs = $csvNotifier->getAllUserNotifications($user->getId());
         $notifications = [];
         foreach ($logs as $log) {
-            $notification = sprintf("Your file %s %s.\n",
+            $notification = sprintf(
+                "Your file %s %s.\n",
                 $log->getFileName(),
                 $log->getIsValid() ? "is valid" : "is invalid"
             );
@@ -200,7 +202,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/view", name="ProductsView")
+     * @Route("/view", options={"expose"=true}, name="ProductsView")
      * @param Request $request
      * @param DBProductExporter $dbProductExporter
      * @return Response
@@ -213,4 +215,3 @@ class ProductController extends AbstractController
         ]);
     }
 }
-

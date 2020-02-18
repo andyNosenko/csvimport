@@ -1,16 +1,16 @@
 $(document).ready(function () {
 
-    $( document ).ajaxError(function( event, jqxhr, settings, exception ) {
-        alert( "Triggered ajaxError handler." );
+    $(document).ajaxError(function (event, jqxhr, settings, exception) {
+        alert("Triggered ajaxError handler.");
     });
 
     $('.edit').click(function () {
-        var  button = $(this);
-        var id = button.data("whatever");
+        var button = $(this);
+        var id = button.data("product-id");
 
         $.ajax({
-            url: '/product/'+id+'',
-            type: 'POST',
+            url: Routing.generate('get_product_by_id', {id: id}),
+            type: 'GET',
             dataType: 'json',
             async: true,
             success: function (data, status) {
@@ -27,28 +27,22 @@ $(document).ready(function () {
                 $('.save').click(function () {
                     var product = {
                         'product_code': modal.find('.modal-body #productCode').val(),
-                        'product_name':  modal.find('.modal-body #productName').val(),
+                        'product_name': modal.find('.modal-body #productName').val(),
                         'product_description': modal.find('.modal-body #productDescription').val(),
                         'stock': modal.find('.modal-body #stock').val(),
-                        'cost':  modal.find('.modal-body #cost').val(),
+                        'cost': modal.find('.modal-body #cost').val(),
                         'discontinued': modal.find('.modal-body #discontinued').val(),
-                        'category':  modal.find('.modal-body #category').val()
+                        'category': modal.find('.modal-body #category').val()
                     };
 
-                    $.ajax({
-                        url: '/save/'+id,
-                        type: 'POST',
-                        dataType: 'json',
-                        data: product,
-                        async: true,
-                        success: function (data, status) {
-                            alert(data);
+                    $.post(
+                        Routing.generate('save_product_by_id', {id: id}),
+                        product,
+                        function () {
+                            alert("Saved successfully!");
                             location.reload();
-                        },
-                        error: function(error) {
-                            alert(error);
                         }
-                    });
+                    );
 
                     $('.close-window').click();
                 });
