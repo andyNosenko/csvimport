@@ -21,7 +21,8 @@
         <br>
         <h2>{% trans %}List of Products{% endtrans %}</h2>
 
-        {% include 'csv/edit_product.html.twig' %}
+{#        {% include 'csv/edit_product.html.twig' %}#}
+
 
         <table>
             <tr>
@@ -51,6 +52,10 @@
 {#                                    data-target="#exampleModalLong" data-product-id="{{ product.id }}">#}
 {#                                Edit#}
 {#                            </button>#}
+                            <button type="button" class="btn btn-primary edit" data-toggle="modal"
+                                    data-target="#exampleModal{{ product.id }}" data-product-id="{{ product.id }}">
+                                Edit
+                            </button>
                             {{ render (controller('App\\Controller\\ProductController::editProductAction', {id: product.id})) }}
                             </td>
                     {% endif %}

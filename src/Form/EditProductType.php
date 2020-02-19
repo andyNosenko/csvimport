@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Product;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -28,8 +29,25 @@ class EditProductType extends AbstractType
                     'label' => 'Discontinued',
                     'required' => false
                 ])
-            ->add('category', TextType::class, ['label' => 'Category'])
-        ;
+            ->add('category', TextType::class,
+                [
+                    'label' => 'Category',
+                    'disabled' => true
+                ])
+            ->add('close', ButtonType::class,
+                [
+                    'label' => 'Close',
+                    'attr' => [
+                        'class' => 'btn btn-secondary close-window',
+                        'data-dismiss' => 'modal'
+                    ]
+                ]
+            )
+            ->add('submit', SubmitType::class,
+                [
+                    'label' => 'Save',
+                    'attr' => ['class' => 'btn btn-primary save']
+                ]);
     }
 
     /**

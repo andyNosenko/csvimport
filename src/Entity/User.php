@@ -53,16 +53,6 @@ class User implements UserInterface
     private $image;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ProductUploadLog", mappedBy="user_id")
-     */
-    private $productLogs;
-
-    public function __construct()
-    {
-        $this->productLogs = new ArrayCollection();
-    }
-
-    /**
      * @return mixed
      */
     public function getImage()
@@ -193,37 +183,6 @@ class User implements UserInterface
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|ProductUploadLog[]
-     */
-    public function getProductLogs(): Collection
-    {
-        return $this->productLogs;
-    }
-
-    public function addProductLog(ProductUploadLog $productLog): self
-    {
-        if (!$this->productLogs->contains($productLog)) {
-            $this->productLogs[] = $productLog;
-            $productLog->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProductLog(ProductUploadLog $productLog): self
-    {
-        if ($this->productLogs->contains($productLog)) {
-            $this->productLogs->removeElement($productLog);
-            // set the owning side to null (unless already changed)
-            if ($productLog->getUser() === $this) {
-                $productLog->setUser(null);
-            }
-        }
 
         return $this;
     }

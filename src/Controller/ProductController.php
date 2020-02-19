@@ -123,9 +123,8 @@ class ProductController extends AbstractController
         $form = $this->createForm(EditProductType::class, $product);
 
         if ($request->isMethod('POST') && $form->handleRequest($request)->isValid()) {
-
             $em->flush();
-
+            return $this->redirectToRoute('importfile');
         }
 
         return $this->render('csv/edit_product.html.twig', array(

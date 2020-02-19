@@ -66,7 +66,7 @@ $(document).ready(function () {
             dataType: 'json',
             async: true,
             success: function (data, status) {
-                var modal = $('#exampleModal'+id);
+                var modal = $('#exampleModal');
                 modal.find('.modal-title').text('The ID is: ' + id);
                 modal.find('.modal-body #edit_product_productCode').val(data.product_code);
                 modal.find('.modal-body #edit_product_productName').val(data.product_name);

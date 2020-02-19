@@ -30,7 +30,7 @@ class ProductConsumer implements ConsumerInterface
     private $csvNotifier;
 
     /**
-     * @var int
+     * @var bool
      */
     private $isValid;
 
@@ -75,9 +75,7 @@ class ProductConsumer implements ConsumerInterface
         if (file_exists($body['path_file'])) {
             $this->csvImportWorker->importProducts($body['path_file'], false);
 //            $this->sendEmail();
-
-            $this->csvImportWorker->getErrors() ? $this->isValid = 0 : $this->isValid = 1;
-
+            $this->isValid = $this->csvImportWorker->getErrors() ? false : true;
             $this->createNotification($body);
             $this->csvImportWorker->resetProductCounters();
             $this->removeFile($body['path_file']);
@@ -113,7 +111,7 @@ class ProductConsumer implements ConsumerInterface
         $this->csvNotifier->createNotification(
             $body['path_file'],
             \DateTime::createFromFormat('Y-m-d H:i:s', $body['dateTimeUploaded']),
-            (bool) $this->isValid,
+            $this->isValid,
             (bool) $this->isReported,
             $body['user']
         );

@@ -3,103 +3,100 @@
 {% block title %}Edit product{% endblock %}
 
 {% block body %}
-    {#        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog"#}
-    {#             aria-labelledby="exampleModalLongTitle"#}
-    {#             aria-hidden="true">#}
-    {#            <div class="modal-dialog" role="document">#}
-    {#                <div class="modal-content">#}
-    {#                    <div class="modal-header">#}
-    {#                        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>#}
-    {#                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
-    {#                            <span aria-hidden="true">&times;</span>#}
-    {#                        </button>#}
-    {#                    </div>#}
-    {#                    <div class="modal-body">#}
-    {#                        <label for="productCode">Product Code</label>#}
-    {#                        <input type="text" id="productCode">#}
-    {#                        <br>#}
-    {#                        <label for="productName">Product Name</label>#}
-    {#                        <input type="text" id="productName">#}
-    {#                        <br>#}
-    {#                        <label for="productDescription">Product Description</label>#}
-    {#                        <input type="text" id ="productDescription">#}
-    {#                        <br>#}
-    {#                        <label for="stock">Stock</label>#}
-    {#                        <input type="text" id="stock">#}
-    {#                        <br>#}
-    {#                        <label for="cost">Cost</label>#}
-    {#                        <input type="text" id="cost">#}
-    {#                        <br>#}
-    {#                        <label for="discontinued">Discontinued</label>#}
-    {#                        <input type="text" id="discontinued">#}
-    {#                        <br>#}
-    {#                        <label for="category">Category</label>#}
-    {#                        <input disabled type="text" id="category">#}
-    {#                    </div>#}
-    {#                    <div class="modal-footer">#}
-    {#                        <button type="button" class="btn btn-secondary close-window" data-dismiss="modal">Close</button>#}
-    {#                        <button type="button" class="btn btn-primary save">Save changes</button>#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#            </div>#}
-    {#        </div>#}
+{#            <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog"#}
+{#                 aria-labelledby="exampleModalLongTitle"#}
+{#                 aria-hidden="true">#}
+{#                <div class="modal-dialog" role="document">#}
+{#                    <div class="modal-content">#}
+{#                        <div class="modal-header">#}
+{#                            <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>#}
+{#                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                <span aria-hidden="true">&times;</span>#}
+{#                            </button>#}
+{#                        </div>#}
+{#                        <div class="modal-body">#}
+{#                            <label for="productCode">Product Code</label>#}
+{#                            <input type="text" id="productCode">#}
+{#                            <br>#}
+{#                            <label for="productName">Product Name</label>#}
+{#                            <input type="text" id="productName">#}
+{#                            <br>#}
+{#                            <label for="productDescription">Product Description</label>#}
+{#                            <input type="text" id ="productDescription">#}
+{#                            <br>#}
+{#                            <label for="stock">Stock</label>#}
+{#                            <input type="text" id="stock">#}
+{#                            <br>#}
+{#                            <label for="cost">Cost</label>#}
+{#                            <input type="text" id="cost">#}
+{#                            <br>#}
+{#                            <label for="discontinued">Discontinued</label>#}
+{#                            <input type="text" id="discontinued">#}
+{#                            <br>#}
+{#                            <label for="category">Category</label>#}
+{#                            <input disabled type="text" id="category">#}
+{#                        </div>#}
+{#                        <div class="modal-footer">#}
+{#                            <button type="button" class="btn btn-secondary close-window" data-dismiss="modal">Close</button>#}
+{#                            <button type="button" class="btn btn-primary save">Save changes</button>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
 
-    <button type="button" class="btn btn-primary edit" data-toggle="modal"
-            data-target="#exampleModal{{ product.id }}" data-product-id="{{ product.id }}">
-        Edit
-    </button>
-    <div class="modal fade" id="exampleModal{{ product.id }}" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {{ form_start(form) }}
 
-                    {{ form(form) }}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-window" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary save">Save changes</button>
+{#    <div class="modal fade" id="exampleModal{{ product.id }}" tabindex="-1" role="dialog"#}
+{#         aria-labelledby="exampleModalLabel"#}
+{#         aria-hidden="true">#}
+{#        <div class="modal-dialog" role="document">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                        <span aria-hidden="true">&times;</span>#}
+{#                    </button>#}
+{#                </div>#}
+{#                <div class="modal-body">#}
+{#                    {{ form_start(form) }}#}
+{#                    {{ form(form) }}#}
+{#                </div>#}
+{#                <div class="modal-footer">#}
+{#                    {{ form_end(form) }}#}
+{#                    <button type="button" class="btn btn-secondary close-window" data-dismiss="modal">Close</button>#}
+{#                    <button type="button" class="btn btn-primary save">Save changes</button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+
+        <div class="bd-example">
+            <div class="modal fade" id="exampleModal{{ product.id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <br><br><br>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title" id="exampleModalLongTitle">Product with id {{ product.id }}</h4>
+                        </div>
+                        <div class="modal-body">
+                            {{ form_start(form, {'action': path('edit_product', {id: product.id}), 'method': 'POST'}) }}
+                            {{ form_row(form.productCode) }}
+                            {{ form_row(form.productName) }}
+                            {{ form_row(form.productDescription) }}
+                            {{ form_row(form.stock) }}
+                            {{ form_row(form.cost) }}
+                            {{ form_row(form.discontinued) }}
+                            {{ form_row(form.category) }}
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    {#    <div class="bd-example">#}
-    {#        <button type="button" class="btn btn-primary" id="" data-toggle="modal"#}
-    {#                data-target="#exampleModal{{ product.id }}" data-whatever="@getbootstrap">Modifier#}
-    {#        </button>#}
-    {#        <div class="modal fade" id="exampleModal{{ product.id }}" tabindex="-1" role="dialog"#}
-    {#             aria-labelledby="exampleModalLabel" aria-hidden="true">#}
-    {#            <div class="modal-dialog" role="document">#}
-    {#                <br><br><br>#}
-    {#                <div class="modal-content">#}
-    {#                    <div class="modal-header">#}
-    {#                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
-    {#                            <span aria-hidden="true">&times;</span>#}
-    {#                        </button>#}
-    {#                        <h4 class="modal-title" id="exampleModalLongTitle">Product with id {{ product.id }}</h4>#}
-    {#                    </div>#}
-    {#                    <div class="modal-body">#}
-    {#                                                {{ form_start(form, {'action': path('edit_product', {id: 42}), 'method': 'POST'}) }}#}
-    {#                        {{ form_start(form) }}#}
-
-    {#                        {{ form(form) }}#}
-    {#                    </div>#}
-    {#                    <div class="modal-footer">#}
-    {#                        {{ form_end(form) }}#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
-
 {% endblock %}
 
