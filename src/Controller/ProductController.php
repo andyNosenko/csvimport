@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -69,39 +70,69 @@ class ProductController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/edit/{id}", options={"expose"=true}, name="edit_product")
-     * @ParamConverter("product", class="SensioBlogBundle:Product")
-     * @param Request $request
-     * @param Product $product
-     * @param EntityManagerInterface $em
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
-     * @throws \Exception
-     */
-    public function editProductAction(Request $request, int $id, EntityManagerInterface $em)
-    {
-        $product = $em->getRepository(Product::class)->findOneBy([
-            'id' => $id,
-        ]);
-        $form = $this->createForm(EditProductType::class, $product, [
-            'action' => $this->generateUrl('edit_product', [
-                'id' => $product->getId()
-            ]),
-            'method' => 'POST',
-        ]);
-        $form->handleRequest($request);
+//    /**
+//     * @Route("/edit/{id}", options={"expose"=true}, name="edit_product")
+//     * @ParamConverter("product", class="SensioBlogBundle:Product")
+//     * @param Request $request
+//     * @param Product $product
+//     * @param EntityManagerInterface $em
+//     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+//     * @throws \Exception
+//     */
+//    public function editProductAction(Request $request, int $id, EntityManagerInterface $em)
+//    {
+//        $product = $em->getRepository(Product::class)->findOneBy([
+//            'id' => $id,
+//        ]);
+//        $form = $this->createForm(EditProductType::class, $product, [
+//            'action' => $this->generateUrl('edit_product', [
+//                'id' => $product->getId()
+//            ]),
+//            'method' => 'GET',
+//        ]);
+//        $form->handleRequest($request);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
+//            $product = $form->getData();
+//            $em = $this->getDoctrine()->getManager();
+//            $em->persist($product);
+//            $em->flush();
+//            return $this->redirectToRoute('importfile');
+//        }
+//
+//        return $this->render('csv/edit_product.html.twig', [
+//            'form' => $form->createView(),
+//        ]);
+//    }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $product = $form->getData();
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($product);
-            $em->flush();
-            return $this->redirectToRoute('importfile');
+    /**
+     * @Route("/edit/{id}", options={"expose"=true}, name="edit_product", requirements={"id"="\d+"})
+     * @param $id
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
+    public function editProductAction(int $id, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $product = $em->getRepository(Product::class)->find($id);
+
+        if (null === $product) {
+            throw new NotFoundHttpException("L'étudiant d'id " . $id . " n'existe pas.");
         }
 
-        return $this->render('csv/edit_product.html.twig', [
+        $form = $this->createForm(EditProductType::class, $product);
+
+        if ($request->isMethod('POST') && $form->handleRequest($request)->isValid()) {
+
+            $em->flush();
+
+        }
+
+        return $this->render('csv/edit_product.html.twig', array(
+            'product' => $product,
             'form' => $form->createView(),
-        ]);
+
+        ));
     }
 
     /**

@@ -29,7 +29,6 @@ class EditProductType extends AbstractType
                     'required' => false
                 ])
             ->add('category', TextType::class, ['label' => 'Category'])
-//            ->add('submit', SubmitType::class, ['label' => 'Save'])
         ;
     }
 
