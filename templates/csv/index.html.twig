@@ -23,7 +23,6 @@
 
 {#        {% include 'csv/edit_product.html.twig' %}#}
 
-
         <table>
             <tr>
                 <th>Product Code</th>
@@ -56,12 +55,14 @@
                                     data-target="#exampleModal{{ product.id }}" data-product-id="{{ product.id }}">
                                 Edit
                             </button>
-                            {{ render (controller('App\\Controller\\ProductController::editProductAction', {id: product.id})) }}
+{#                            {{ render (controller('App\\Controller\\ProductController::editProductAction', {id: product.id})) }}#}
                             </td>
                     {% endif %}
                 </tr>
             {% endfor %}
         </table>
+        <div id="edit-window">
+        </div>
         <div class="navigation">
             {{ knp_pagination_render(productsView) }}
         </div>

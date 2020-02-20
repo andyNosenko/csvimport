@@ -127,7 +127,7 @@ class ProductController extends AbstractController
             return $this->redirectToRoute('importfile');
         }
 
-        return $this->render('csv/edit_product.html.twig', array(
+        return $this->render('csv/edit_product_ajax.html.twig', array(
             'product' => $product,
             'form' => $form->createView(),
 
