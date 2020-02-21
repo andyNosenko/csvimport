@@ -70,41 +70,6 @@ class ProductController extends AbstractController
         ]);
     }
 
-//    /**
-//     * @Route("/edit/{id}", options={"expose"=true}, name="edit_product")
-//     * @ParamConverter("product", class="SensioBlogBundle:Product")
-//     * @param Request $request
-//     * @param Product $product
-//     * @param EntityManagerInterface $em
-//     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
-//     * @throws \Exception
-//     */
-//    public function editProductAction(Request $request, int $id, EntityManagerInterface $em)
-//    {
-//        $product = $em->getRepository(Product::class)->findOneBy([
-//            'id' => $id,
-//        ]);
-//        $form = $this->createForm(EditProductType::class, $product, [
-//            'action' => $this->generateUrl('edit_product', [
-//                'id' => $product->getId()
-//            ]),
-//            'method' => 'GET',
-//        ]);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            $product = $form->getData();
-//            $em = $this->getDoctrine()->getManager();
-//            $em->persist($product);
-//            $em->flush();
-//            return $this->redirectToRoute('importfile');
-//        }
-//
-//        return $this->render('csv/edit_product.html.twig', [
-//            'form' => $form->createView(),
-//        ]);
-//    }
-
     /**
      * @Route("/edit/{id}", options={"expose"=true}, name="edit_product", requirements={"id"="\d+"})
      * @param $id
@@ -117,7 +82,7 @@ class ProductController extends AbstractController
         $product = $em->getRepository(Product::class)->find($id);
 
         if (null === $product) {
-            throw new NotFoundHttpException("L'étudiant d'id " . $id . " n'existe pas.");
+            throw new NotFoundHttpException("Product with " . $id . " not found.");
         }
 
         $form = $this->createForm(EditProductType::class, $product);
