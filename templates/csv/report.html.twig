@@ -1,13 +1,12 @@
 {% extends "base.html.twig" %}
 {% block title %}Report{% endblock %}
 {% block body %}
+    {{ encore_entry_script_tags('app') }}
     {% for message in app.flashes('notice') %}
         <div class="alert alert-notice">
             {{ message }}
         </div>
     {% endfor %}
-    <h1>Total items found: {{ total }}</h1>
-    <br>
     {% if errors %}
         <h1>Sorry, but your csv file is not valid(</h1>
         <p>Please check file and upload again</p>
@@ -18,6 +17,8 @@
         <br>
     {% endif %}
     {% if processed %}
+        <h1>Total items found: {{ total }}</h1>
+        <br>
         <h1>Items were skipped: {{ skipped }}</h1>
         <br>
         <h1>Items were processed: {{ processed }}</h1>
@@ -29,6 +30,7 @@
                 <th>Stock</th>
                 <th>Cost in GBP</th>
                 <th>Discontinued</th>
+                <th>Category</th>
             </tr>
             {% for product in products %}
                 <tr>
@@ -38,6 +40,7 @@
                     <td>{{ product.stock }}</td>
                     <td>{{ product.cost }}</td>
                     <td>{{ product.discontinued }}</td>
+                    <td>{{ product.category.name }}</td>
                 </tr>
             {% endfor %}
         </table>

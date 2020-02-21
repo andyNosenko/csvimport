@@ -105,6 +105,18 @@
     "egulias/email-validator": {
         "version": "2.1.15"
     },
+    "friendsofsymfony/jsrouting-bundle": {
+        "version": "2.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "2.3",
+            "ref": "a9f2e49180f75cdc71ae279a929c4b2e0638de84"
+        },
+        "files": [
+            "config/routes/fos_js_routing.yaml"
+        ]
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
@@ -349,6 +361,18 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
+    "symfony/messenger": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "8a2675c061737658bed85102e9241c752620e575"
+        },
+        "files": [
+            "config/packages/messenger.yaml"
+        ]
+    },
     "symfony/mime": {
         "version": "v4.4.3"
     },
@@ -448,13 +472,13 @@
         "version": "v4.4.3"
     },
     "symfony/security-csrf": {
-        "version": "v4.4.3"
+        "version": "v4.4.4"
     },
     "symfony/security-guard": {
-        "version": "v4.4.3"
+        "version": "v4.4.4"
     },
     "symfony/security-http": {
-        "version": "v4.4.3"
+        "version": "v4.4.4"
     },
     "symfony/serializer": {
         "version": "v4.4.3"
@@ -565,6 +589,9 @@
     "symfony/yaml": {
         "version": "v4.4.3"
     },
+    "twbs/bootstrap": {
+        "version": "v4.4.1"
+    },
     "twig/extra-bundle": {
         "version": "v3.0.1"
     },
@@ -573,6 +600,9 @@
     },
     "webmozart/assert": {
         "version": "1.6.0"
+    },
+    "willdurand/jsonp-callback-validator": {
+        "version": "v1.1.0"
     },
     "zendframework/zend-code": {
         "version": "3.4.1"

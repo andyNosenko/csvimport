@@ -12,11 +12,29 @@ class CSVFileValidator
     private $errorMessages = [];
 
     /**
+     * @var array
+     */
+    private $validColumnsRule = [
+        'Product Code',
+        'Product Name',
+        'Product Description',
+        'Stock',
+        'Cost in GBP',
+        'Discontinued',
+        'Category'
+    ];
+
+    /**
      * @return array
      */
     public function getErrorMessages(): array
     {
         return $this->errorMessages;
+    }
+
+    public function setErrorMessages($messages)
+    {
+        $this->errorMessages = $messages;
     }
 
     /**
@@ -34,6 +52,18 @@ class CSVFileValidator
             $this->validateCategoryField($row['Category'], $key, 'Category');
         }
 
+        return empty($this->errorMessages);
+    }
+
+    /**
+     * @param array $columns
+     * @return bool
+     */
+    public function validateColumns(Array $columns)
+    {
+        if ($columns != $this->validColumnsRule) {
+            array_push($this->errorMessages, "Columns are not valid!");
+        }
         return empty($this->errorMessages);
     }
 
@@ -147,6 +177,11 @@ class CSVFileValidator
         }
     }
 
+    /**
+     * @param $value
+     * @param Int $rowNumber
+     * @param String $fieldName
+     */
     private function validateCategoryField($value, Int $rowNumber, String $fieldName): void
     {
         if ($this->isEmptyValue($value)) {
@@ -162,6 +197,10 @@ class CSVFileValidator
         }
     }
 
+    /**
+     * @param $value
+     * @return bool
+     */
     private function isEmptyValue($value): bool
     {
         return $value == "";

@@ -28,22 +28,54 @@ class CSVImportWorker
     /**
      * @var int
      */
-    public $totalCount;
+    private $totalCount = 0;
 
     /**
      * @var int
      */
-    public $processedCount;
+    private $processedCount = 0;
 
     /**
      * @var int
      */
-    public $skippedCount;
+    private $skippedCount = 0;
 
     /**
      * @var \ArrayObject
      */
-    public $products;
+    private $products;
+
+    /**
+     * @return int
+     */
+    public function getTotalCount(): int
+    {
+        return $this->totalCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProcessedCount(): int
+    {
+        return $this->processedCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSkippedCount(): int
+    {
+        return $this->skippedCount;
+    }
+
+    /**
+     * @return \ArrayObject
+     */
+    public function getProducts(): \ArrayObject
+    {
+        return $this->products;
+    }
 
     /**
      * @param EntityManagerInterface $em
@@ -65,15 +97,17 @@ class CSVImportWorker
      * @param String $path
      * @param bool $isTest
      */
-    //TODO: Instead String path Reader object
     public function importProducts(String $path, Bool $isTest)
     {
         $reader = $this->csvFileReader->read($path);
         $results = $reader->fetchAssoc();
+        $column = $reader->fetchOne();
 
-        if ($this->csvFileValidator->validate($results)) {
-            $this->totalCount = iterator_count($results);
-            $this->importToDatabase($results, $isTest);
+        if ($this->csvFileValidator->validateColumns($column)) {
+            if ($this->csvFileValidator->validate($results)) {
+                $this->totalCount = iterator_count($results);
+                $this->importToDatabase($results, $isTest);
+            }
         }
     }
 
@@ -135,6 +169,20 @@ class CSVImportWorker
     public function getErrors()
     {
         return $this->csvFileValidator->getErrorMessages();
+    }
+
+    public function resetErrors()
+    {
+        $this->csvFileValidator->setErrorMessages([]);
+    }
+
+    public function resetProductCounters()
+    {
+        $this->products = new \ArrayObject();
+        $this->totalCount = 0;
+        $this->skippedCount = 0;
+        $this->processedCount = 0;
+        $this->resetErrors();
     }
 }
 

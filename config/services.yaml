@@ -37,27 +37,40 @@ services:
             $senderEmail: '%adminBox%'
             $recipientEmail: '%recipientBox%'
 
-    email_service:
-        class: App\Rabbit\EmailService
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%kernel.project_dir%/public/uploads/images/'
+
+
+
+    parsing:
+        class: App\Rabbit\ProductProducer
+        decorates: old_sound_rabbit_mq.parsing_producer
+
+    product_consumer:
+        class: App\Rabbit\ProductConsumer
+
+    App\Controller\ProductController:
+        arguments:
+            $producer: '@old_sound_rabbit_mq.parsing_producer'
 
 old_sound_rabbit_mq:
     connections:
         default:
-            host: 'localhost'
-            user: 'guest'
-            password: 'guest'
-            vhost: 'csv.loc'
+            host: '%rabbitHost%'
+            user: '%rabbitUser%'
+            password: '%rabbitPass%'
+            vhost: '%rabbitVHost%'
     producers:
-        emailing:
+        parsing:
             connection: default
             exchange_options:
-                name: emails
-                type: direct
+                name: products
+                type: topic
     consumers:
-        emailing:
+        parsing:
             connection:       default
-            exchange_options: {name: 'emails', type: direct}
-            queue_options:    {name: 'emails'}
-            callback:         email_service
-
+            exchange_options: {name: 'products', type: topic}
+            queue_options:    {name: 'products'}
+            callback:         product_consumer
 

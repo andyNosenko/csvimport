@@ -3,5 +3,68 @@
 {% block title %}Import your csv file to database{% endblock %}
 
 {% block body %}
-    {{ form(form) }}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            {{ encore_entry_script_tags('notifications') }}
+            {{ encore_entry_script_tags('edit_product') }}
+        {% endif %}
+    {% endblock %}
+    <div class="container">
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <a href="{{ path('logout') }}" >Logout</a>
+        {% endif %}
+        <div id="ajax-results"></div>
+        {% if is_granted("ROLE_ADMIN") == true %}
+            {{ form(form) }}
+        {% endif %}
+        <br>
+        <h2>{% trans %}List of Products{% endtrans %}</h2>
+
+{#        {% include 'csv/edit_product.html.twig' %}#}
+
+        <table>
+            <tr>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Product Description</th>
+                <th>Stock</th>
+                <th>Cost in GBP</th>
+                <th>Discontinued</th>
+                <th>Category</th>
+                {% if is_granted("ROLE_ADMIN") == true %}
+                    <th>Actions</th>
+                {% endif %}
+            </tr>
+            {% for product in productsView %}
+                <tr>
+                    <td>{{ product.productCode }}</td>
+                    <td>{{ product.productName }}</td>
+                    <td>{{ product.productDescription }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>{{ product.cost }}</td>
+                    <td>{{ product.discontinued }}</td>
+                    <td>{{ product.category.name }}</td>
+                    {% if is_granted("ROLE_ADMIN") == true %}
+                        <td>
+{#                            <button type="button" class="btn btn-primary edit" data-toggle="modal"#}
+{#                                    data-target="#exampleModalLong" data-product-id="{{ product.id }}">#}
+{#                                Edit#}
+{#                            </button>#}
+                            <button type="button" class="btn btn-primary edit" data-toggle="modal"
+                                    data-target="#exampleModal{{ product.id }}" data-product-id="{{ product.id }}">
+                                Edit
+                            </button>
+{#                            {{ render (controller('App\\Controller\\ProductController::editProductAction', {id: product.id})) }}#}
+                            </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        <div id="edit-window">
+        </div>
+        <div class="navigation">
+            {{ knp_pagination_render(productsView) }}
+        </div>
+    </div>
 {% endblock %}
